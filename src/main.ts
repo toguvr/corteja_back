@@ -1,14 +1,18 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './modules/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Env } from './modules/env';
+import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configService: ConfigService<Env, true> = app.get(ConfigService);
   const port = configService.get('PORT', { infer: true });
+
+  const reflector = app.get(Reflector);
+  app.useGlobalGuards(new JwtAuthGuard(reflector));
 
   app.useGlobalPipes(
     new ValidationPipe({

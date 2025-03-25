@@ -3,18 +3,21 @@ import { CreateAuthenticationDto } from './dto/create-authentication.dto';
 import { UpdateAuthenticationDto } from './dto/update-authentication.dto';
 import { IHashProvider } from 'src/core/providers/hash/interface/IHashProvider';
 import { IJwtProvider } from 'src/core/providers/jwt/interface/IJwtProvider';
-import { IUserRepository } from '../users/repositories/interface/IUserRepository';
+import { PrismaService } from '@/core/database/prisma.service';
 
 @Injectable()
 export class AuthenticationsService {
   constructor(
-    private readonly userRepository: IUserRepository,
+    private readonly prisma: PrismaService,
     private readonly hashProvider: IHashProvider,
     private readonly jwtProvider: IJwtProvider,
   ) {}
   async create(createAuthenticationDto: CreateAuthenticationDto) {
     const { email, password } = createAuthenticationDto;
-    const checkUserExist = await this.userRepository.findByEmail(email);
+
+    const checkUserExist = await this.prisma.barbershop.findFirst({
+      where: { email },
+    });
 
     if (!checkUserExist) {
       throw new UnauthorizedException('Email ou senha incorretos!');
@@ -29,7 +32,7 @@ export class AuthenticationsService {
       throw new UnauthorizedException('Email ou senha incorretos!');
     }
 
-    const accessToken = this.jwtProvider.sign(checkUserExist.id!);
+    const accessToken = this.jwtProvider.sign(checkUserExist.id);
 
     return { access_token: accessToken };
   }

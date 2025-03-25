@@ -15,6 +15,7 @@ import {
 } from './dto/create-authentication.dto';
 import { UpdateAuthenticationDto } from './dto/update-authentication.dto';
 import { ZodValidationPipe } from '@/core/pipes/zod/zod-validation-pipe';
+import { IsPublic } from '@/core/decorators/is-public.decorator';
 
 @Controller('authentications')
 export class AuthenticationsController {
@@ -23,6 +24,7 @@ export class AuthenticationsController {
   ) {}
 
   @Post()
+  @IsPublic()
   @UsePipes(new ZodValidationPipe(authenticateBodySchema))
   create(@Body() createAuthenticationDto: CreateAuthenticationDto) {
     return this.authenticationsService.create(createAuthenticationDto);

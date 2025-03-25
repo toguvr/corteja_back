@@ -13,13 +13,191 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Address {
+  id             String       @id @default(uuid())
+  street         String?
+  complementary  String?
+  street_number  String?
+  neighborhood   String?
+  city           String?
+  state          String?
+  zipCode        String?
+  referencePoint String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  barbershopId   String
+  barbershops    Barbershop[]
+  customers      Customer[]
 
-  @@map("users")
+  @@map("addresses")
+}
+
+model Bank {
+  id                String       @id @default(uuid())
+  holderName        String?
+  holderType        String
+  holderDocument    String       @unique
+  bank              String?
+  branchNumber      String?
+  branchCheckDigit  String?
+  accountCheckDigit String?
+  accountNumber     String?
+  type              String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  barbershops       Barbershop[]
+
+  @@map("banks")
+}
+
+model Barbershop {
+  id           String        @id @default(uuid())
+  name         String
+  logo         String?
+  email        String
+  password     String
+  fee          Int?          @default(10)
+  address      Address?      @relation(fields: [addressId], references: [id])
+  slug         String        @unique
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  barbers      Barber[]
+  services     Service[]
+  schedules    Schedule[]
+  customers    Customer[]
+  bank         Bank?         @relation(fields: [bankId], references: [id])
+  addressId    String?
+  receiverId   String?
+  bankId       String?
+  appointments Appointment[]
+  payments     Payment[]
+  balances     Balance[]
+
+  @@map("barbershops")
+}
+
+model Barber {
+  id           String        @id @default(uuid())
+  name         String?
+  barbershop   Barbershop    @relation(fields: [barbershopId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  barbershopId String
+  appointments Appointment[]
+  payments     Payment[]
+
+  @@map("barbers")
+}
+
+model Service {
+  id           String        @id @default(uuid())
+  name         String?
+  description  String?
+  timeRequired String?
+  amount       Int?
+  barbershop   Barbershop    @relation(fields: [barbershopId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  barbershopId String
+  appointments Appointment[]
+  payments     Payment[]
+
+  @@map("services")
+}
+
+model Schedule {
+  id           String        @id @default(uuid())
+  time         String?
+  weekDay      String?
+  limit        Int?
+  barbershop   Barbershop    @relation(fields: [barbershopId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  barbershopId String
+  appointments Appointment[]
+
+  @@map("schedules")
+}
+
+model Customer {
+  id           String        @id @default(uuid())
+  name         String?
+  email        String?
+  password     String
+  phone        String        @unique
+  document     String?
+  address      Address?      @relation(fields: [addressId], references: [id])
+  cardId       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  addressId    String?
+  appointments Appointment[]
+  payments     Payment[]
+  balances     Balance[]
+  Barbershop   Barbershop?   @relation(fields: [barbershopId], references: [id])
+  barbershopId String?
+
+  @@map("customers")
+}
+
+model Appointment {
+  id           String     @id @default(uuid())
+  barber       Barber     @relation(fields: [barberId], references: [id])
+  date         DateTime
+  service      Service?   @relation(fields: [serviceId], references: [id])
+  schedule     Schedule?  @relation(fields: [scheduleId], references: [id])
+  customer     Customer?  @relation(fields: [customerId], references: [id])
+  barbershop   Barbershop @relation(fields: [barbershopId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  barberId     String
+  serviceId    String?
+  scheduleId   String?
+  customerId   String?
+  barbershopId String
+
+  @@map("appointments")
+}
+
+model Payment {
+  id            String      @id @default(uuid())
+  paymentDate   DateTime?
+  status        String?
+  transactionId String?
+  paymentMethod String?
+  fee           Int?
+  amount        Int?
+  installments  Int?
+  total         Int?
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+  barbershop    Barbershop? @relation(fields: [barbershopId], references: [id])
+  service       Service?    @relation(fields: [serviceId], references: [id])
+  barber        Barber?     @relation(fields: [barberId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  customerId    String?
+  barbershopId  String?
+  serviceId     String?
+  barberId      String?
+  balances      Balance[]
+
+  @@map("payments")
+}
+
+model Balance {
+  id           String      @id @default(uuid())
+  paymentDate  DateTime?
+  status       String?
+  amount       Int?
+  payment      Payment?    @relation(fields: [paymentId], references: [id])
+  type         String?
+  customer     Customer?   @relation(fields: [customerId], references: [id])
+  barbershop   Barbershop? @relation(fields: [barbershopId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  customerId   String?
+  barbershopId String?
+  paymentId    String?
+
+  @@map("balances")
 }

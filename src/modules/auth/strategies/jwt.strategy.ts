@@ -14,12 +14,11 @@ export type UserPayload = z.infer<typeof tokenPayloadSchema>;
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(config: ConfigService<Env, true>) {
-    const publicKey = config.get('JWT_PUBLIC_KEY', { infer: true });
+    const publicKey = config.get('JWT_SECRET', { infer: true });
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: Buffer.from(publicKey, 'base64'),
-      algorithms: ['RS256'],
+      secretOrKey: publicKey,
     });
   }
 
