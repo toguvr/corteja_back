@@ -86,6 +86,7 @@ model Barber {
   barbershopId String
   appointments Appointment[]
   payments     Payment[]
+  Schedule     Schedule[]
 
   @@map("barbers")
 }
@@ -111,11 +112,13 @@ model Schedule {
   time         String?
   weekDay      String?
   limit        Int?
+  barber       Barber?       @relation(fields: [barberId], references: [id])
   barbershop   Barbershop    @relation(fields: [barbershopId], references: [id])
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   barbershopId String
   appointments Appointment[]
+  barberId     String?
 
   @@map("schedules")
 }
