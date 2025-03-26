@@ -1,17 +1,40 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { PrismaService } from '@/core/database/prisma.service';
 import { Prisma } from '@prisma/client';
+import { IHashProvider } from '@/core/providers/hash/interface/IHashProvider';
 
 @Injectable()
 export class CustomersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly hashProvider: IHashProvider,
+  ) {}
 
-  async create(createCustomerDto: Prisma.CustomerCreateInput) {
-    const response = await this.prisma.customer.create({
-      data: { ...createCustomerDto },
+  async create({ email, phone, password, name }: Prisma.CustomerCreateInput) {
+    if (!email) {
+      throw new ConflictException('Email não informado!');
+    }
+    const checkUserExist = await this.prisma.customer.findFirst({
+      where: { email: email as string },
     });
-    return response;
+
+    if (checkUserExist) {
+      throw new ConflictException('Email já em uso!');
+    }
+
+    const hashedPassword = await this.hashProvider.generateHash(password);
+
+    const user = await this.prisma.customer.create({
+      data: {
+        name,
+        email,
+        phone,
+        password: hashedPassword,
+      },
+    });
+
+    return user;
   }
 
   async findAll() {

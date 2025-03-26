@@ -13,6 +13,7 @@ import { SchedulesModule } from './schedules/schedules.module';
 import { BanksModule } from './banks/banks.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { CustomersModule } from './customers/customers.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CustomersModule } from './customers/customers.module';
     AddressesModule,
     CustomersModule,
     BarbershopsModule,
+    OrdersModule,
     ConfigModule.forRoot({
       validate: (env) => envSchema.parse(env),
       isGlobal: true,

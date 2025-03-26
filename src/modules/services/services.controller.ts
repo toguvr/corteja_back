@@ -24,6 +24,11 @@ export class ServicesController {
     return this.servicesService.findAll();
   }
 
+  @Get('barbershop/:barbershopId')
+  findAllByBarbershopId(@Param('barbershopId') barbershopId: string) {
+    return this.servicesService.findAllByBarbershopId(barbershopId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.servicesService.findOne(id);

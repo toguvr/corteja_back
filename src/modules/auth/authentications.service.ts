@@ -13,11 +13,17 @@ export class AuthenticationsService {
     private readonly jwtProvider: IJwtProvider,
   ) {}
   async create(createAuthenticationDto: CreateAuthenticationDto) {
-    const { email, password } = createAuthenticationDto;
-
-    const checkUserExist = await this.prisma.barbershop.findFirst({
-      where: { email },
-    });
+    const { email, password, role } = createAuthenticationDto;
+    let checkUserExist;
+    if (role === 'customer') {
+      checkUserExist = await this.prisma.customer.findFirst({
+        where: { email },
+      });
+    } else {
+      checkUserExist = await this.prisma.barbershop.findFirst({
+        where: { email },
+      });
+    }
 
     if (!checkUserExist) {
       throw new UnauthorizedException('Email ou senha incorretos!');
@@ -34,7 +40,7 @@ export class AuthenticationsService {
 
     const accessToken = this.jwtProvider.sign(checkUserExist.id);
 
-    return { access_token: accessToken };
+    return { access_token: accessToken, user: checkUserExist };
   }
 
   findAll() {

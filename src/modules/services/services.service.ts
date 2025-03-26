@@ -18,6 +18,12 @@ export class ServicesService {
     const response = await this.prisma.service.findMany();
     return response;
   }
+  async findAllByBarbershopId(barbershopId: string) {
+    const response = await this.prisma.service.findMany({
+      where: { barbershopId },
+    });
+    return response;
+  }
 
   async findOne(id: string) {
     const response = await this.prisma.service.findFirst({ where: { id } });

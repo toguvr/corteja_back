@@ -53,9 +53,10 @@ model Bank {
 model Barbershop {
   id           String        @id @default(uuid())
   name         String
-  logo         String?
+  avatar       String?
   email        String
   password     String
+  haveLoyalty  Boolean       @default(true)
   fee          Int?          @default(10)
   address      Address?      @relation(fields: [addressId], references: [id])
   slug         String        @unique
@@ -64,7 +65,6 @@ model Barbershop {
   barbers      Barber[]
   services     Service[]
   schedules    Schedule[]
-  customers    Customer[]
   bank         Bank?         @relation(fields: [bankId], references: [id])
   addressId    String?
   receiverId   String?
@@ -72,6 +72,7 @@ model Barbershop {
   appointments Appointment[]
   payments     Payment[]
   balances     Balance[]
+  Order        Order[]
 
   @@map("barbershops")
 }
@@ -126,6 +127,7 @@ model Customer {
   password     String
   phone        String        @unique
   document     String?
+  avatar       String?
   address      Address?      @relation(fields: [addressId], references: [id])
   cardId       String?
   createdAt    DateTime      @default(now())
@@ -134,8 +136,7 @@ model Customer {
   appointments Appointment[]
   payments     Payment[]
   balances     Balance[]
-  Barbershop   Barbershop?   @relation(fields: [barbershopId], references: [id])
-  barbershopId String?
+  Order        Order[]
 
   @@map("customers")
 }
@@ -180,6 +181,8 @@ model Payment {
   serviceId     String?
   barberId      String?
   balances      Balance[]
+  order         Order?      @relation(fields: [orderId], references: [id])
+  orderId       String?
 
   @@map("payments")
 }
@@ -200,4 +203,24 @@ model Balance {
   paymentId    String?
 
   @@map("balances")
+}
+
+model Order {
+  id            String      @id @default(uuid())
+  status        String?
+  amount        Int?
+  fee           Int?
+  total         Int?
+  installments  Int?
+  paymentMethod String?
+  servicesIds   String?
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+  barbershop    Barbershop? @relation(fields: [barbershopId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  customerId    String?
+  barbershopId  String?
+  payments      Payment[]
+
+  @@map("orders")
 }

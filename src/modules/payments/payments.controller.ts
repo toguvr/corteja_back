@@ -1,12 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { IsPublic } from '@/core/decorators/is-public.decorator';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post()
+  @IsPublic()
   create(@Body() createPaymentDto) {
     return this.paymentsService.create(createPaymentDto);
   }
