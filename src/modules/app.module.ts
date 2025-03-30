@@ -14,6 +14,8 @@ import { BanksModule } from './banks/banks.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { CustomersModule } from './customers/customers.module';
 import { OrdersModule } from './orders/orders.module';
+import { PlansModule } from './plans/plans.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { OrdersModule } from './orders/orders.module';
     ServicesModule,
     PaymentsModule,
     BalancesModule,
+    PlansModule,
+    SubscriptionsModule,
     AppointmentsModule,
     SchedulesModule,
     BanksModule,

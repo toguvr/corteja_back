@@ -57,7 +57,13 @@ export class SchedulesService {
   async findOne(id: string) {
     return await this.prisma.schedule.findFirst({ where: { id } });
   }
-
+  async findAllByBarbershopId(barbershopId: string, barberId: string) {
+    const response = await this.prisma.schedule.findMany({
+      where: { barbershopId, barberId },
+      include: { appointments: true, subscriptions: true },
+    });
+    return response;
+  }
   async update(id: string, updateScheduleDto: UpdateScheduleDto) {
     return await this.prisma.schedule.update({
       where: { id },

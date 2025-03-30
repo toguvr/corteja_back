@@ -28,7 +28,10 @@ export class BarbersController {
   findOne(@Param('id') id: string) {
     return this.barbersService.findOne(id);
   }
-
+  @Get('barbershop/:barbershopId')
+  findAllByBarbershopId(@Param('barbershopId') barbershopId: string) {
+    return this.barbersService.findAllByBarbershopId(barbershopId);
+  }
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBarberDto: UpdateBarberDto) {
     return this.barbersService.update(id, updateBarberDto);

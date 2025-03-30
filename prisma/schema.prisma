@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Address {
-  id             String       @id @default(uuid())
+  id             String   @id @default(uuid())
   street         String?
   complementary  String?
   street_number  String?
@@ -23,11 +23,11 @@ model Address {
   state          String?
   zipCode        String?
   referencePoint String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  barbershopId   String
-  barbershops    Barbershop[]
-  customers      Customer[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  barbershops Barbershop[]
+  customers   Customer[]
 
   @@map("addresses")
 }
@@ -51,42 +51,45 @@ model Bank {
 }
 
 model Barbershop {
-  id           String        @id @default(uuid())
+  id           String         @id @default(uuid())
   name         String
   avatar       String?
   email        String
   password     String
-  haveLoyalty  Boolean       @default(true)
-  fee          Int?          @default(10)
-  address      Address?      @relation(fields: [addressId], references: [id])
-  slug         String        @unique
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  haveLoyalty  Boolean        @default(true)
+  fee          Int?           @default(10)
+  address      Address?       @relation(fields: [addressId], references: [id])
+  slug         String         @unique
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   barbers      Barber[]
   services     Service[]
   schedules    Schedule[]
-  bank         Bank?         @relation(fields: [bankId], references: [id])
+  bank         Bank?          @relation(fields: [bankId], references: [id])
   addressId    String?
   receiverId   String?
   bankId       String?
   appointments Appointment[]
   payments     Payment[]
   balances     Balance[]
-  Order        Order[]
+  orders       Order[]
+  plans        Plan[]
+  Subscription Subscription[]
 
   @@map("barbershops")
 }
 
 model Barber {
-  id           String        @id @default(uuid())
+  id           String         @id @default(uuid())
   name         String?
-  barbershop   Barbershop    @relation(fields: [barbershopId], references: [id])
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  barbershop   Barbershop     @relation(fields: [barbershopId], references: [id])
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   barbershopId String
   appointments Appointment[]
   payments     Payment[]
-  Schedule     Schedule[]
+  schedules    Schedule[]
+  Subscription Subscription[]
 
   @@map("barbers")
 }
@@ -103,43 +106,47 @@ model Service {
   barbershopId String
   appointments Appointment[]
   payments     Payment[]
+  plans        Plan[]
 
   @@map("services")
 }
 
 model Schedule {
-  id           String        @id @default(uuid())
-  time         String?
-  weekDay      String?
-  limit        Int?
-  barber       Barber?       @relation(fields: [barberId], references: [id])
-  barbershop   Barbershop    @relation(fields: [barbershopId], references: [id])
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  barbershopId String
-  appointments Appointment[]
-  barberId     String?
+  id            String         @id @default(uuid())
+  time          String?
+  weekDay       String?
+  limit         Int?
+  barber        Barber?        @relation(fields: [barberId], references: [id])
+  barbershop    Barbershop     @relation(fields: [barbershopId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  barbershopId  String
+  appointments  Appointment[]
+  barberId      String?
+  subscriptions Subscription[]
 
   @@map("schedules")
 }
 
 model Customer {
-  id           String        @id @default(uuid())
-  name         String?
-  email        String?
-  password     String
-  phone        String        @unique
-  document     String?
-  avatar       String?
-  address      Address?      @relation(fields: [addressId], references: [id])
-  cardId       String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  addressId    String?
-  appointments Appointment[]
-  payments     Payment[]
-  balances     Balance[]
-  Order        Order[]
+  id                      String         @id @default(uuid())
+  name                    String?
+  email                   String?
+  password                String
+  phone                   String         @unique
+  document                String?
+  avatar                  String?
+  address                 Address?       @relation(fields: [addressId], references: [id])
+  cardId                  String?
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+  addressId               String?
+  customerChargeGatewayId String?
+  appointments            Appointment[]
+  payments                Payment[]
+  balances                Balance[]
+  Order                   Order[]
+  Subscription            Subscription[]
 
   @@map("customers")
 }
@@ -226,4 +233,40 @@ model Order {
   payments      Payment[]
 
   @@map("orders")
+}
+
+model Plan {
+  id                  String         @id @default(uuid())
+  interval            String?
+  price               Int?
+  billingType         String?
+  chargeGatewayPlanId String?
+  service             Service?       @relation(fields: [serviceId], references: [id])
+  barbershop          Barbershop?    @relation(fields: [barbershopId], references: [id])
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  barbershopId        String?
+  serviceId           String?
+  subscriptions       Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                          String      @id @default(uuid())
+  plan                        Plan?       @relation(fields: [planId], references: [id])
+  customer                    Customer?   @relation(fields: [customerId], references: [id])
+  barbershop                  Barbershop? @relation(fields: [barbershopId], references: [id])
+  barber                      Barber?     @relation(fields: [barberId], references: [id])
+  schedule                    Schedule?   @relation(fields: [scheduleId], references: [id])
+  cardId                      String?
+  planId                      String?
+  customerId                  String?
+  barbershopId                String?
+  barberId                    String?
+  chargeGatewaySubscriptionId String?
+  active                      Boolean     @default(false)
+  scheduleId                  String?
+
+  @@map("subscriptions")
 }

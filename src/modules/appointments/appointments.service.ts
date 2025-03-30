@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PrismaService } from '@/core/database/prisma.service';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AppointmentsService {
@@ -37,7 +36,6 @@ export class AppointmentsService {
     if (!barbershop) {
       throw new BadRequestException('Barbearia não encontrada.');
     }
-
     // 3. Verificar se o cliente existe
     const customer = await this.prisma.customer.findUnique({
       where: { id: customerId },
@@ -109,15 +107,44 @@ export class AppointmentsService {
     // Verificar se o serviço tem um valor definido
     const serviceAmount = service.amount ?? 0; // Se for null ou undefined, assume 0
 
-    console.log(
-      `Saldo disponível: ${userBalance}, Valor do serviço: ${serviceAmount}`,
-    );
-
     if (userBalance < serviceAmount) {
       throw new BadRequestException(
         `Saldo insuficiente! Saldo atual: ${userBalance}, Valor do serviço: ${serviceAmount}`,
       );
     }
+
+    const parsedDate = new Date(date);
+    const dayStart = new Date(parsedDate);
+    dayStart.setHours(0, 0, 0, 0);
+
+    const dayEnd = new Date(parsedDate);
+    dayEnd.setHours(23, 59, 59, 999);
+    // Busca o schedule com os appointments daquele dia
+    const scheduleForThisDate = await this.prisma.schedule.findUnique({
+      where: { id: scheduleId },
+      select: {
+        limit: true,
+        appointments: {
+          where: {
+            date: {
+              gte: dayStart,
+              lte: dayEnd,
+            },
+          },
+          select: { id: true },
+        },
+      },
+    });
+
+    const totalAppointments = scheduleForThisDate?.appointments.length || 0;
+    const isFull =
+      scheduleForThisDate?.limit !== null &&
+      totalAppointments >= (scheduleForThisDate?.limit || 0);
+
+    if (isFull) {
+      throw new BadRequestException('Esse horário já está cheio.');
+    }
+
     // 8. Criar o agendamento
     const appointment = await this.prisma.appointment.create({
       data: {
@@ -142,9 +169,188 @@ export class AppointmentsService {
 
     return appointment;
   }
+  async runWeeklySubscriptionJob() {
+    const subscriptions = await this.prisma.subscription.findMany({
+      where: { active: true },
+      include: {
+        customer: true,
+        barber: true,
+        barbershop: true,
+        schedule: true,
+        plan: { include: { service: true } },
+      },
+    });
+
+    for (const subscription of subscriptions) {
+      const {
+        barberId,
+        customerId,
+        barbershopId,
+        scheduleId,
+        plan,
+        schedule,
+        customer,
+        barber,
+        barbershop,
+      } = subscription;
+
+      if (
+        !schedule?.weekDay ||
+        !schedule?.time ||
+        !plan?.service ||
+        !barbershopId ||
+        !barberId
+      )
+        continue;
+
+      const appointmentDate = this.getNextAppointmentDate(
+        parseInt(schedule?.weekDay),
+        schedule?.time,
+      );
+
+      // Verificar se já existe agendamento nesse horário para o usuário
+      const existingAppointment = await this.prisma.appointment.findFirst({
+        where: { customerId, barbershopId, date: appointmentDate },
+      });
+
+      if (existingAppointment) continue; // Evita duplicidade
+
+      // Verificar limite do horário
+      const scheduleAppointments = await this.prisma.appointment.count({
+        where: {
+          scheduleId,
+          date: appointmentDate,
+        },
+      });
+
+      if (schedule.limit !== null && scheduleAppointments >= schedule.limit)
+        continue;
+
+      // Verifica saldo do usuário
+      const balances = await this.prisma.balance.findMany({
+        where: { customerId, barbershopId },
+      });
+      const userBalance = balances.reduce((acc, balance) => {
+        return balance.type === 'INCOME'
+          ? acc + (balance.amount || 0)
+          : acc - (balance.amount || 0);
+      }, 0);
+
+      const serviceAmount = plan.service.amount || 0;
+
+      if (userBalance < serviceAmount) continue; // Ignora se saldo insuficiente
+
+      // Criar o agendamento
+      await this.prisma.appointment.create({
+        data: {
+          barberId,
+          customerId,
+          barbershopId,
+          scheduleId,
+          serviceId: plan.service.id,
+          date: appointmentDate,
+        },
+      });
+
+      // Criar balance
+      await this.prisma.balance.create({
+        data: {
+          paymentDate: new Date(),
+          status: 'received',
+          amount: serviceAmount,
+          type: 'OUTCOME',
+          customerId,
+          barbershopId,
+        },
+      });
+    }
+  }
+
+  private getNextAppointmentDate(weekDay: number, time: string): Date {
+    const [hours, minutes] = time.split(':').map(Number);
+    const now = new Date();
+
+    const daysAhead = (weekDay + 7 - now.getDay()) % 7 || 7;
+    const nextDate = new Date(now);
+
+    nextDate.setDate(now.getDate() + daysAhead);
+    nextDate.setHours(hours, minutes, 0, 0);
+
+    return nextDate;
+  }
 
   async findAll() {
     return await this.prisma.appointment.findMany();
+  }
+
+  async findAllNextFromUser(customerId: string) {
+    const now = new Date();
+
+    const upcomingAppointments = await this.prisma.appointment.findMany({
+      where: {
+        customerId,
+        date: {
+          gte: now,
+        },
+      },
+      orderBy: {
+        date: 'asc',
+      },
+      include: {
+        barber: true,
+        barbershop: true,
+        service: true,
+        schedule: true,
+      },
+    });
+
+    return upcomingAppointments;
+  }
+
+  async findAllPastFromUser(customerId: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
+
+    const [appointments, total] = await this.prisma.appointment
+      .findMany({
+        where: {
+          customerId,
+          date: {
+            lt: new Date(),
+          },
+        },
+        orderBy: {
+          date: 'desc',
+        },
+        skip,
+        take: limit,
+        include: {
+          barber: true,
+          barbershop: true,
+          service: true,
+          schedule: true,
+        },
+      })
+      .then((data) => [
+        data,
+        this.prisma.appointment.count({
+          where: {
+            customerId,
+            date: {
+              lt: new Date(),
+            },
+          },
+        }),
+      ]);
+
+    return {
+      data: appointments,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(Number(total) / limit),
+      },
+    };
   }
 
   async findOne(id: string) {

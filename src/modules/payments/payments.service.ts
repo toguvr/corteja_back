@@ -1,7 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { PrismaService } from '@/core/database/prisma.service';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PaymentsService {
@@ -13,6 +12,7 @@ export class PaymentsService {
     const barbershopId = createPaymentDto?.data?.metadata?.barbershopId;
     const customerId = createPaymentDto?.data?.metadata?.customerId;
     const orderId = createPaymentDto?.data?.metadata?.orderId;
+    const subscriptionId = createPaymentDto?.data?.metadata?.subscriptionId;
 
     const amount = createPaymentDto?.data?.last_transaction?.amount;
     // payment_method === 'credit_card'
@@ -53,13 +53,21 @@ export class PaymentsService {
         type: 'INCOME',
       },
     });
-
-    await this.prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status: 'PAID',
-      },
-    });
+    if (orderId) {
+      await this.prisma.order.update({
+        where: { id: orderId },
+        data: {
+          status: 'PAID',
+        },
+      });
+    } else if (subscriptionId) {
+      await this.prisma.subscription.update({
+        where: { id: subscriptionId },
+        data: {
+          active: true,
+        },
+      });
+    }
     return payment;
   }
 

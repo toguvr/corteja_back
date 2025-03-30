@@ -23,7 +23,12 @@ export class BarbersService {
     const response = await this.prisma.barber.findFirst({ where: { id } });
     return response;
   }
-
+  async findAllByBarbershopId(barbershopId: string) {
+    const response = await this.prisma.barber.findMany({
+      where: { barbershopId },
+    });
+    return response;
+  }
   async update(id: string, updateBarberDto: UpdateBarberDto) {
     const response = await this.prisma.barber.update({
       where: { id },

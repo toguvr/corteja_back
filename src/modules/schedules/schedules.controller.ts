@@ -28,7 +28,13 @@ export class SchedulesController {
   findOne(@Param('id') id: string) {
     return this.schedulesService.findOne(id);
   }
-
+  @Get('barbershop/:barbershopId/barber/:barberId')
+  findAllByBarbershopId(
+    @Param('barbershopId') barbershopId: string,
+    @Param('barberId') barberId: string,
+  ) {
+    return this.schedulesService.findAllByBarbershopId(barbershopId, barberId);
+  }
   @Patch(':id')
   update(
     @Param('id') id: string,
