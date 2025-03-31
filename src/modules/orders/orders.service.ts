@@ -141,7 +141,7 @@ export class OrdersService {
     if (isPix) {
       const orderRequest = new pagarme.CreateOrderRequest({
         metadata,
-        customer: customerToPagarme,
+        customer_id: customer.customerChargeGatewayId,
         items,
         payments: [
           {
