@@ -190,6 +190,7 @@ model Payment {
   barbershopId  String?
   serviceId     String?
   barberId      String?
+  type          String?
   balances      Balance[]
   order         Order?      @relation(fields: [orderId], references: [id])
   orderId       String?

@@ -40,6 +40,7 @@ export class PaymentsService {
         orderId,
         amount,
         installments: Number(installments),
+        type: subscriptionId ? 'Assinatura' : 'Avulso',
       },
     });
     await this.prisma.balance.create({
