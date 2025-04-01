@@ -75,6 +75,21 @@ export class PaymentsService {
     return await this.prisma.payment.findMany();
   }
 
+  async findAllByCustomer(customerId: string) {
+    const payments = await this.prisma.payment.findMany({
+      where: { customerId },
+      include: {
+        customer: true,
+        service: true,
+        barber: true,
+        barbershop: true,
+      },
+      orderBy: { paymentDate: 'desc' },
+    });
+
+    return payments;
+  }
+
   async findOne(id: string) {
     return await this.prisma.payment.findFirst({ where: { id } });
   }

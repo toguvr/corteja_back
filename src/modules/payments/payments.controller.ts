@@ -10,6 +10,7 @@ import {
 import { PaymentsService } from './payments.service';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { IsPublic } from '@/core/decorators/is-public.decorator';
+import { CurrentUser } from '@/core/decorators/current-user.decorator';
 
 @Controller('payments')
 export class PaymentsController {
@@ -24,6 +25,11 @@ export class PaymentsController {
   @Get()
   findAll() {
     return this.paymentsService.findAll();
+  }
+
+  @Get('mine')
+  findAllByCustomer(@CurrentUser() user) {
+    return this.paymentsService.findAllByCustomer(user?.sub);
   }
 
   @Get(':id')
