@@ -365,6 +365,24 @@ export class AppointmentsService {
   }
 
   async remove(id: string) {
+    const appointment = await this.prisma.appointment.findFirst({
+      where: { id },
+      include: { service: true },
+    });
+    if (!appointment) {
+      throw new BadRequestException('Agendamento não encontrado.');
+    }
+    // Criar balance
+    await this.prisma.balance.create({
+      data: {
+        paymentDate: new Date(),
+        status: 'received',
+        amount: appointment?.service?.amount,
+        type: 'INCOME',
+        customerId: appointment?.customerId,
+        barbershopId: appointment?.barbershopId,
+      },
+    });
     return await this.prisma.appointment.delete({ where: { id } });
   }
 }

@@ -1,9 +1,12 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { PrismaService } from '@/core/database/prisma.service';
-import { Prisma } from '@prisma/client';
 import * as pagarme from '@pagarme/sdk';
-
+import axios from 'axios';
 const privateKey = process.env.PAGARME_API;
 pagarme.Configuration.basicAuthUserName = privateKey;
 @Injectable()
@@ -90,6 +93,37 @@ export class SubscriptionsService {
   }
 
   async remove(id: string) {
-    return await this.prisma.subscription.delete({ where: { id } });
+    const subscription = await this.prisma.subscription.findUnique({
+      where: { id },
+    });
+    if (!subscription) {
+      throw new BadRequestException('Assinatura não encontrada.');
+    }
+    if (subscription.canceledAt) {
+      throw new BadRequestException('Assinatura já cancelada.');
+    }
+    if (subscription.active === false) {
+      throw new BadRequestException('Assinatura já inativada.');
+    }
+    if (!subscription.chargeGatewaySubscriptionId) {
+      throw new BadRequestException('Assinatura não encontrada.');
+    }
+    await axios.delete(
+      `https://api.pagar.me/core/v5/subscriptions/${subscription.chargeGatewaySubscriptionId}?cancel_at_period_end=true`,
+      {
+        auth: {
+          username: privateKey!,
+          password: '', // o campo de senha fica em branco
+        },
+      },
+    );
+    const newSubscription = await this.prisma.subscription.update({
+      where: { id: subscription?.id },
+      data: {
+        canceledAt: new Date(),
+      },
+    });
+
+    // return await this.prisma.subscription.delete({ where: { id } });
   }
 }
