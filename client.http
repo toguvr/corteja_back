@@ -27,3 +27,8 @@ Content-Type: application/json
 GET {{baseUrl}}/users/me
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
+###
+
+# @name bulk cron
+POST {{baseUrl}}/appointments/subscriptions-job
+Content-Type: application/json

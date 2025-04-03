@@ -39,6 +39,12 @@ export class AppointmentsController {
   findAllNextFromUser(@CurrentUser() user) {
     return this.appointmentsService.findAllNextFromUser(user.sub);
   }
+  @Get('/barber/:barberId')
+  findAllFromBarber(@Param('barberId') barberId: string, @Query('date') date) {
+    const data = this.appointmentsService.findByBarberAndDate(barberId, date);
+    return data;
+  }
+
   @Get('past')
   findAllPastFromUser(
     @CurrentUser() user,

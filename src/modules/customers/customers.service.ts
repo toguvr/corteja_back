@@ -92,6 +92,9 @@ export class CustomersService {
     const customer = await this.prisma.customer.findUnique({
       where: { id: customerId },
     });
+    if (!customer?.customerChargeGatewayId) {
+      return [];
+    }
     const cards = await pagarme.CustomersController.getCards(
       customer?.customerChargeGatewayId,
     );

@@ -306,7 +306,40 @@ export class AppointmentsService {
 
     return upcomingAppointments;
   }
+  async findByBarberAndDate(barberId: string, date: string) {
+    const startDate = new Date(date);
+    startDate.setHours(0, 0, 0, 0);
 
+    const endDate = new Date(date);
+    endDate.setHours(23, 59, 59, 999);
+
+    return this.prisma.appointment.findMany({
+      where: {
+        barberId,
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      orderBy: {
+        date: 'asc',
+      },
+      include: {
+        customer: {
+          select: {
+            name: true,
+            avatar: true,
+            phone: true,
+          },
+        },
+        service: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+  }
   async findAllPastFromUser(customerId: string, page: number, limit: number) {
     const skip = (page - 1) * limit;
 

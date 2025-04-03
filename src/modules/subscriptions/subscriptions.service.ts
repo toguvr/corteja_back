@@ -6,7 +6,6 @@ import {
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { PrismaService } from '@/core/database/prisma.service';
 import * as pagarme from '@pagarme/sdk';
-import axios from 'axios';
 const privateKey = process.env.PAGARME_API;
 pagarme.Configuration.basicAuthUserName = privateKey;
 @Injectable()
@@ -102,28 +101,38 @@ export class SubscriptionsService {
     if (subscription.canceledAt) {
       throw new BadRequestException('Assinatura já cancelada.');
     }
-    if (subscription.active === false) {
-      throw new BadRequestException('Assinatura já inativada.');
-    }
+    // if (subscription.active === false) {
+    //   throw new BadRequestException('Assinatura já inativada.');
+    // }
     if (!subscription.chargeGatewaySubscriptionId) {
       throw new BadRequestException('Assinatura não encontrada.');
     }
-    await axios.delete(
-      `https://api.pagar.me/core/v5/subscriptions/${subscription.chargeGatewaySubscriptionId}?cancel_at_period_end=true`,
-      {
-        auth: {
-          username: privateKey!,
-          password: '', // o campo de senha fica em branco
-        },
+    const options = {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Basic ${btoa(privateKey + ':')}`,
+        accept: 'application/json',
+        'content-type': 'application/json',
       },
-    );
+
+      body: JSON.stringify({ cancel_pending_invoices: true }),
+    };
+
+    const res = await fetch(
+      `https://api.pagar.me/core/v5/subscriptions/${subscription.chargeGatewaySubscriptionId}`,
+      options,
+    )
+      .then((res) => res.json())
+      .then((res) => console.log(res))
+      .catch((err) => console.error(err));
+
     const newSubscription = await this.prisma.subscription.update({
       where: { id: subscription?.id },
       data: {
         canceledAt: new Date(),
+        active: false,
       },
     });
-
-    // return await this.prisma.subscription.delete({ where: { id } });
+    return newSubscription;
   }
 }
