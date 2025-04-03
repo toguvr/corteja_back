@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateBarbershopDto } from './dto/create-barbershop.dto';
 import { UpdateBarbershopDto } from './dto/update-barbershop.dto';
 import { PrismaService } from '@/core/database/prisma.service';
@@ -67,6 +71,89 @@ export class BarbershopsService {
     }
     const { password, ...barbershopWithoutPassword } = barbershop;
     return barbershopWithoutPassword;
+  }
+  async getDashboard(id: string) {
+    const barbershop = await this.prisma.barbershop.findFirst({
+      where: { id },
+    });
+
+    if (!barbershop) {
+      throw new ConflictException('Conta nao encontrada!');
+    }
+    const barbershopId = barbershop.id;
+    if (!barbershopId) {
+      throw new BadRequestException('Barbershop ID is required');
+    }
+
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const appointments = await this.prisma.appointment.findMany({
+      where: {
+        barbershopId,
+        date: {
+          gte: start,
+          lte: end,
+        },
+      },
+    });
+
+    const subscriptionsCount = await this.prisma.subscription.count({
+      where: {
+        barbershopId,
+        active: true,
+      },
+    });
+
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        barbershopId,
+        paymentDate: {
+          gte: start,
+          lte: end,
+        },
+      },
+    });
+
+    const revenue = payments.reduce(
+      (sum, payment) => sum + (payment?.total || 0),
+      0,
+    );
+
+    const daysInMonth: { day: string; appointments: number }[] = [];
+    const revenueByDay: { day: string; revenue: number }[] = [];
+
+    const days = end.getDate();
+    for (let d = 1; d <= days; d++) {
+      const dayStr =
+        d.toString().padStart(2, '0') +
+        '/' +
+        (now.getMonth() + 1).toString().padStart(2, '0');
+
+      const apptCount = appointments.filter(
+        (appt) => appt.date.getDate() === d,
+      ).length;
+      const revenueSum = payments
+        .filter(
+          (payment) =>
+            payment.paymentDate && payment.paymentDate.getDate() === d,
+        )
+        .reduce((sum, p) => sum + (p?.total || 0), 0);
+
+      daysInMonth.push({ day: dayStr, appointments: apptCount });
+      revenueByDay.push({ day: dayStr, revenue: revenueSum / 100 });
+    }
+
+    return {
+      summary: {
+        appointments: appointments.length,
+        revenue: revenue / 100,
+        subscriptions: subscriptionsCount,
+      },
+      appointmentsChart: daysInMonth,
+      revenueChart: revenueByDay,
+    };
   }
 
   async findOneBySlug(slug: string) {

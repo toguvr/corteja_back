@@ -40,6 +40,11 @@ export class BarbershopsController {
     return this.barbershopsService.findOne(user.sub);
   }
 
+  @Get('dashboard')
+  getDashboard(@CurrentUser() user: UserPayload) {
+    return this.barbershopsService.getDashboard(user.sub);
+  }
+
   @Get('slug/:slug')
   findOneBySlug(@Param('slug') slug: string) {
     return this.barbershopsService.findOneBySlug(slug);

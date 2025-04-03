@@ -8,13 +8,15 @@ export class SchedulesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createScheduleDto) {
+    const weekDays = createScheduleDto.map((schedule) => schedule.weekDay);
+    const times = createScheduleDto.map((schedule) => schedule.time);
     const existingSchedules = await this.prisma.schedule.findMany({
       where: {
         barbershopId: {
           in: createScheduleDto.map((schedule) => schedule.barbershopId),
         }, // Filtra por barbearia
-        weekDay: { in: createScheduleDto.map((schedule) => schedule.weekDay) }, // Filtra por dia da semana
-        time: { in: createScheduleDto.map((schedule) => schedule.time) }, // Filtra por horário
+        weekDay: { in: weekDays }, // Filtra por dia da semana
+        time: { in: times }, // Filtra por horário
       },
       select: { time: true, weekDay: true, barbershopId: true },
     });
