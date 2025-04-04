@@ -35,7 +35,7 @@ export class ServicesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto) {
+  update(@Param('id') id: string, @Body() updateServiceDto) {
     return this.servicesService.update(id, updateServiceDto);
   }
 
