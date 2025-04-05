@@ -31,6 +31,10 @@ export class PaymentsController {
   findAllByCustomer(@CurrentUser() user) {
     return this.paymentsService.findAllByCustomer(user?.sub);
   }
+  @Get('barbershop')
+  findAllByBarbershop(@CurrentUser() user) {
+    return this.paymentsService.findAllByBarbershop(user?.sub);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

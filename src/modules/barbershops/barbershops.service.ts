@@ -7,7 +7,7 @@ import { CreateBarbershopDto } from './dto/create-barbershop.dto';
 import { UpdateBarbershopDto } from './dto/update-barbershop.dto';
 import { PrismaService } from '@/core/database/prisma.service';
 import { IHashProvider } from '@/core/providers/hash/interface/IHashProvider';
-
+import axios from 'axios';
 @Injectable()
 export class BarbershopsService {
   constructor(
@@ -25,15 +25,15 @@ export class BarbershopsService {
       .replace(/\s+/g, '-'); // Substitui espaços por hífens
   };
 
-  async create({ name, email, password }: CreateBarbershopDto) {
-    const slug = this.generateSlug(name);
+  async create(dto: any) {
     const checkUserExist = await this.prisma.barbershop.findFirst({
-      where: { email },
+      where: { email: dto.register_information.email },
     });
 
     if (checkUserExist) {
       throw new ConflictException('Email já em uso!');
     }
+    const slug = this.generateSlug(dto.register_information.name);
     const checkSlugExist = await this.prisma.barbershop.findFirst({
       where: { slug },
     });
@@ -42,18 +42,60 @@ export class BarbershopsService {
       throw new ConflictException('Nome já em uso!');
     }
 
-    const hashedPassword = await this.hashProvider.generateHash(password);
+    const hashedPassword = await this.hashProvider.generateHash(dto.password);
+    delete dto.password;
+    const response = await axios.post(
+      'https://api.pagar.me/core/v5/recipients',
+      dto,
+      {
+        headers: {
+          Authorization: `Basic ${Buffer.from(
+            process.env.PAGARME_API + ':',
+          ).toString('base64')}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
 
-    const user = await this.prisma.barbershop.create({
+    const receiver = response.data;
+
+    return this.prisma.barbershop.create({
       data: {
-        name,
-        email,
+        name: dto.register_information.name,
+        email: dto.register_information.email,
         password: hashedPassword,
         slug,
+        fee: 5,
+        haveLoyalty: false,
+        receiverId: receiver?.id,
+        address: {
+          create: {
+            street: dto.register_information.address.street,
+            complementary: dto.register_information.address.complement,
+            street_number: dto.register_information.address.number,
+            neighborhood: dto.register_information.address.neighborhood,
+            city: dto.register_information.address.city,
+            state: dto.register_information.address.state,
+            zipCode: dto.register_information.address.zip_code,
+            referencePoint: dto.register_information.address.reference_point,
+          },
+        },
+        bank: {
+          create: {
+            holderName: dto.default_bank_account.legal_name,
+            holderDocument: dto.default_bank_account.document_number,
+            holderType: dto.default_bank_account.type,
+            bank: dto.default_bank_account.bank_code,
+            branchNumber: dto.default_bank_account.agencia,
+            branchCheckDigit: dto.default_bank_account.agencia_dv,
+            accountNumber: dto.default_bank_account.conta,
+            accountCheckDigit: dto.default_bank_account.conta_dv,
+            type: dto.default_bank_account.type,
+          },
+        },
       },
+      include: { bank: true, address: true },
     });
-
-    return user;
   }
 
   async findAll() {
@@ -182,3 +224,159 @@ export class BarbershopsService {
     return response;
   }
 }
+const pj = {
+  register_information: {
+    type: 'corporation',
+    document: '44527868000110',
+    name: '',
+    email: 'augusto@hubees.com.br',
+    phone_numbers: [
+      {
+        ddd: '24',
+        number: '998169141',
+        type: 'mobile',
+      },
+    ],
+    site_url: null,
+    company_name: 'Codar Teste',
+    trading_name: 'Codar INFORMATICA LTDA',
+    annual_revenue: 300000,
+    founding_date: '',
+    address: {
+      street: 'Rua Senador Irineu Machado',
+      complement: 'ap 501',
+      number: '10',
+      neighborhood: 'Jardim Amália',
+      city: 'Volta Redonda',
+      state: 'RJ',
+      zip_code: '27251070',
+      reference_point: 'esquina',
+    },
+    managing_partners: [
+      {
+        name: 'Augusto',
+        email: 'augustotf93@gmail.com',
+        document: '14752479745',
+        type: 'individual',
+        mother_name: 'maria rita',
+        birth_date: '1993-11-23',
+        monthly_income: '30000',
+        professional_occupation: 'empresario',
+        self_declared_legal_representative: false,
+        address: {
+          street: 'Rua Senador Irineu Machado',
+          complement: 'com',
+          number: '10',
+          neighborhood: 'Jardim Amália',
+          city: 'Volta Redonda',
+          state: 'RJ',
+          zip_code: '27251070',
+          reference_point: 'subida',
+        },
+        phone_numbers: [
+          {
+            ddd: '24',
+            number: '998169141',
+            type: 'mobile',
+          },
+        ],
+      },
+    ],
+    main_address: {
+      street: 'Rua Senador Irineu Machado',
+      complement: 'ap 501',
+      number: '10',
+      neighborhood: 'Jardim Amália',
+      city: 'Volta Redonda',
+      state: 'RJ',
+      zip_code: '27251070',
+      reference_point: 'esquina',
+    },
+  },
+  default_bank_account: {
+    bank: '260',
+    branch_number: '0001',
+    branch_check_digit: '0',
+    account_number: '10995696',
+    account_check_digit: '1',
+    type: 'checking',
+    holder_type: 'company',
+    holder_document: '44527868000110',
+    holder_name: 'HOME BOX 2 LTDA',
+  },
+};
+const pf = {
+  register_information: {
+    type: 'individual',
+    document: '14752479745',
+    name: 'Augusto fisico',
+    email: 'augustotf93@gmail.com',
+    phone_numbers: [
+      {
+        ddd: '24',
+        number: '998169141',
+        type: 'mobile',
+      },
+    ],
+    site_url: null,
+    company_name: '',
+    trading_name: '',
+    annual_revenue: '',
+    founding_date: '',
+    address: {
+      street: 'Rua Senador Irineu Machado',
+      complement: 'ap 501',
+      number: '10',
+      neighborhood: 'Jardim Amália',
+      city: 'Volta Redonda',
+      state: 'RJ',
+      zip_code: '27251070',
+      reference_point: 'teste',
+    },
+    managing_partners: [
+      {
+        name: 'Augusto',
+        email: 'augustotf93@gmail.com',
+        document: '14752479745',
+        type: 'individual',
+        mother_name: 'maria rita',
+        birth_date: '1993-11-23',
+        monthly_income: '30000',
+        professional_occupation: 'empresario',
+        self_declared_legal_representative: false,
+        address: {
+          street: 'Rua Senador Irineu Machado',
+          complement: 'com',
+          number: '10',
+          neighborhood: 'Jardim Amália',
+          city: 'Volta Redonda',
+          state: 'RJ',
+          zip_code: '27251070',
+          reference_point: 'subida',
+        },
+        phone_numbers: [
+          {
+            ddd: '24',
+            number: '998169141',
+            type: 'mobile',
+          },
+        ],
+      },
+    ],
+    birth_date: '1993-11-23',
+    professional_occupation: 'empresario',
+    mother_name: 'maria rita',
+    monthly_income: '300000',
+  },
+  default_bank_account: {
+    bank: '260',
+    branch_number: '0001',
+    branch_check_digit: '0',
+    account_number: '10995696',
+    account_check_digit: '5',
+    type: 'checking',
+    holder_type: 'individual',
+    holder_document: '14752479745',
+    holder_name: 'Augusto Telles Francisco',
+  },
+};

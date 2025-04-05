@@ -6,15 +6,10 @@ import {
   Patch,
   Param,
   Delete,
-  UsePipes,
 } from '@nestjs/common';
 import { BarbershopsService } from './barbershops.service';
-import {
-  createBarbershopBodySchema,
-  CreateBarbershopDto,
-} from './dto/create-barbershop.dto';
+import { CreateBarbershopDto } from './dto/create-barbershop.dto';
 import { UpdateBarbershopDto } from './dto/update-barbershop.dto';
-import { ZodValidationPipe } from '@/core/pipes/zod/zod-validation-pipe';
 import { CurrentUser } from '@/core/decorators/current-user.decorator';
 import { UserPayload } from '../auth/strategies/jwt.strategy';
 import { IsPublic } from '@/core/decorators/is-public.decorator';
@@ -24,9 +19,8 @@ export class BarbershopsController {
   constructor(private readonly barbershopsService: BarbershopsService) {}
 
   @Post()
-  @UsePipes(new ZodValidationPipe(createBarbershopBodySchema))
   @IsPublic()
-  create(@Body() createBarbershopDto: CreateBarbershopDto) {
+  create(@Body() createBarbershopDto) {
     return this.barbershopsService.create(createBarbershopDto);
   }
 
