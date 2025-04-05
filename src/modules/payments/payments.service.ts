@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { PrismaService } from '@/core/database/prisma.service';
 import axios from 'axios';

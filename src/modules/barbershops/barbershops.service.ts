@@ -3,7 +3,6 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { CreateBarbershopDto } from './dto/create-barbershop.dto';
 import { UpdateBarbershopDto } from './dto/update-barbershop.dto';
 import { PrismaService } from '@/core/database/prisma.service';
 import { IHashProvider } from '@/core/providers/hash/interface/IHashProvider';
