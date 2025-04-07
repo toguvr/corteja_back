@@ -22,6 +22,16 @@ export class CustomersController {
   create(@Body() createCustomerDto) {
     return this.customersService.create(createCustomerDto);
   }
+  @Post('reset-password')
+  @IsPublic()
+  reset(@Body() resetPasswordDto) {
+    return this.customersService.reset(resetPasswordDto);
+  }
+  @Post('forgot')
+  @IsPublic()
+  forgot(@Body() forgotDto) {
+    return this.customersService.forgot(forgotDto);
+  }
 
   @Get()
   findAll() {

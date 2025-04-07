@@ -54,6 +54,7 @@ model Barbershop {
   id           String         @id @default(uuid())
   name         String
   avatar       String?
+  code         String?
   email        String
   password     String
   haveLoyalty  Boolean        @default(true)
@@ -135,6 +136,7 @@ model Customer {
   password                String
   phone                   String         @unique
   document                String?
+  code                    String?
   avatar                  String?
   address                 Address?       @relation(fields: [addressId], references: [id])
   cardId                  String?

@@ -6,6 +6,7 @@ import {
 import { UpdateBarbershopDto } from './dto/update-barbershop.dto';
 import { PrismaService } from '@/core/database/prisma.service';
 import { IHashProvider } from '@/core/providers/hash/interface/IHashProvider';
+import { Resend } from 'resend';
 import axios from 'axios';
 @Injectable()
 export class BarbershopsService {
@@ -96,7 +97,68 @@ export class BarbershopsService {
       include: { bank: true, address: true },
     });
   }
+  async forgot(data: any) {
+    const checkUserExist = await this.prisma.barbershop.findFirst({
+      where: { email: data.email },
+    });
 
+    if (!checkUserExist) {
+      throw new ConflictException('Usuário não existe.');
+    }
+    const token = Math.floor(100000 + Math.random() * 900000);
+    await this.prisma.barbershop.update({
+      where: { id: checkUserExist.id },
+      data: {
+        ...checkUserExist,
+        code: String(token),
+      },
+    });
+    const resend = new Resend(process.env.RESEND_API);
+
+    resend.emails.send({
+      from: 'contato@nossonutri.com',
+      to: data.email,
+      subject: '[CorteJa] Recuperação de senha',
+      html: `<style>
+  .message-content {
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 600px;
+    font-size: 18px;
+    line-height: 21px;
+  }
+</style>
+
+<div class="message-content">
+  <p>Olá, ${checkUserExist?.name}</p>
+  <p>Parece que uma troca de senha para sua conta foi solicitada.</p>
+  <p>Se foi você, então clique no link abaixo para escolher uma nova senha:</p>
+  <p>
+    <a href="https://nossonutri.com/redefinir-senha?token=${token}">Resetar minha senha</a>
+  </p>
+  <p>Obrigado <br>
+    <strong>Equipe NossoNutri</strong>
+  </p>
+</div>`,
+    });
+  }
+  async reset(data: any) {
+    const checkUserExist = await this.prisma.barbershop.findFirst({
+      where: { code: data.code },
+    });
+
+    if (!checkUserExist) {
+      throw new ConflictException('Usuário não existe.');
+    }
+    const hashedPassword = await this.hashProvider.generateHash(data.password);
+
+    await this.prisma.barbershop.update({
+      where: { id: checkUserExist.id },
+      data: {
+        ...checkUserExist,
+        password: hashedPassword,
+      },
+    });
+  }
   async findAll() {
     const response = await this.prisma.barbershop.findMany();
     return response;

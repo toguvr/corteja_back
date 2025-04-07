@@ -4,6 +4,7 @@ import { PrismaService } from '@/core/database/prisma.service';
 import { Prisma } from '@prisma/client';
 import { IHashProvider } from '@/core/providers/hash/interface/IHashProvider';
 import * as pagarme from '@pagarme/sdk';
+import { Resend } from 'resend';
 
 const privateKey = process.env.PAGARME_API;
 pagarme.Configuration.basicAuthUserName = privateKey;
@@ -84,6 +85,68 @@ export class CustomersService {
     return user;
   }
 
+  async forgot(data: any) {
+    const checkUserExist = await this.prisma.customer.findFirst({
+      where: { email: data.email },
+    });
+
+    if (!checkUserExist) {
+      throw new ConflictException('Usuário não existe.');
+    }
+    const token = Math.floor(100000 + Math.random() * 900000);
+    await this.prisma.customer.update({
+      where: { id: checkUserExist.id },
+      data: {
+        ...checkUserExist,
+        code: String(token),
+      },
+    });
+    const resend = new Resend(process.env.RESEND_API);
+
+    resend.emails.send({
+      from: 'contato@nossonutri.com',
+      to: data.email,
+      subject: '[CorteJa] Recuperação de senha',
+      html: `<style>
+  .message-content {
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 600px;
+    font-size: 18px;
+    line-height: 21px;
+  }
+</style>
+
+<div class="message-content">
+  <p>Olá, ${checkUserExist?.name}</p>
+  <p>Parece que uma troca de senha para sua conta foi solicitada.</p>
+  <p>Se foi você, então clique no link abaixo para escolher uma nova senha:</p>
+  <p>
+    <a href="https://nossonutri.com/redefinir-senha?token=${token}">Resetar minha senha</a>
+  </p>
+  <p>Obrigado <br>
+    <strong>Equipe NossoNutri</strong>
+  </p>
+</div>`,
+    });
+  }
+  async reset(data: any) {
+    const checkUserExist = await this.prisma.customer.findFirst({
+      where: { code: data.code },
+    });
+
+    if (!checkUserExist) {
+      throw new ConflictException('Usuário não existe.');
+    }
+    const hashedPassword = await this.hashProvider.generateHash(data.password);
+
+    await this.prisma.customer.update({
+      where: { id: checkUserExist.id },
+      data: {
+        ...checkUserExist,
+        password: hashedPassword,
+      },
+    });
+  }
   async findAll() {
     return await this.prisma.customer.findMany();
   }

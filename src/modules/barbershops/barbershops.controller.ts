@@ -23,7 +23,16 @@ export class BarbershopsController {
   create(@Body() createBarbershopDto) {
     return this.barbershopsService.create(createBarbershopDto);
   }
-
+  @Post('reset-password')
+  @IsPublic()
+  reset(@Body() resetPasswordDto) {
+    return this.barbershopsService.reset(resetPasswordDto);
+  }
+  @Post('forgot')
+  @IsPublic()
+  forgot(@Body() forgotDto) {
+    return this.barbershopsService.forgot(forgotDto);
+  }
   @Get()
   findAll() {
     return this.barbershopsService.findAll();
