@@ -38,7 +38,7 @@ export class PlansService {
         scheme_type: 'unit',
         price: totalAmount,
       },
-      payment_methods: ['credit_card', 'debit_card'],
+      payment_methods: ['debit_card'],
       shippable: false,
       quantity: 1,
     });
