@@ -12,16 +12,23 @@ import { AppointmentsService } from './appointments.service';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { CurrentUser } from '@/core/decorators/current-user.decorator';
 import { IsPublic } from '@/core/decorators/is-public.decorator';
+import Bottleneck from 'bottleneck';
 
+const limiter = new Bottleneck({
+  maxConcurrent: 1,
+  minTime: 0,
+});
 @Controller('appointments')
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Post()
   create(@CurrentUser() user, @Body() createAppointmentDto) {
-    return this.appointmentsService.create({
-      ...createAppointmentDto,
-      customerId: user.sub,
+    return limiter.schedule(() => {
+      return this.appointmentsService.create({
+        ...createAppointmentDto,
+        customerId: user.sub,
+      });
     });
   }
 
