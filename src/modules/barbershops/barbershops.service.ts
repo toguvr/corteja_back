@@ -133,7 +133,7 @@ export class BarbershopsService {
   <p>Parece que uma troca de senha para sua conta foi solicitada.</p>
   <p>Se foi você, então clique no link abaixo para escolher uma nova senha:</p>
   <p>
-    <a href="https://nossonutri.com/redefinir-senha?token=${token}">Resetar minha senha</a>
+    <a href="https://nossonutri.com/empresa/redefinir-senha?token=${token}">Resetar minha senha</a>
   </p>
   <p>Obrigado <br>
     <strong>Equipe NossoNutri</strong>
