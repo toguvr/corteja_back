@@ -26,6 +26,7 @@ export class BarbershopsService {
   };
 
   async create(dto: any) {
+    const barbershopName = dto.barbershopName;
     const checkUserExist = await this.prisma.barbershop.findFirst({
       where: { email: dto.register_information.email },
     });
@@ -33,7 +34,7 @@ export class BarbershopsService {
     if (checkUserExist) {
       throw new ConflictException('Email já em uso!');
     }
-    const slug = this.generateSlug(dto.register_information.name);
+    const slug = this.generateSlug(barbershopName);
     const checkSlugExist = await this.prisma.barbershop.findFirst({
       where: { slug },
     });
@@ -41,9 +42,9 @@ export class BarbershopsService {
     if (checkSlugExist) {
       throw new ConflictException('Nome já em uso!');
     }
-
     const hashedPassword = await this.hashProvider.generateHash(dto.password);
     delete dto.password;
+    delete dto.barbershopName;
     const response = await axios.post(
       'https://api.pagar.me/core/v5/recipients',
       dto,
@@ -61,7 +62,7 @@ export class BarbershopsService {
 
     return this.prisma.barbershop.create({
       data: {
-        name: dto.register_information.name,
+        name: barbershopName,
         email: dto.register_information.email,
         password: hashedPassword,
         slug,
@@ -82,14 +83,14 @@ export class BarbershopsService {
         },
         bank: {
           create: {
-            holderName: dto.default_bank_account.legal_name,
-            holderDocument: dto.default_bank_account.document_number,
-            holderType: dto.default_bank_account.type,
-            bank: dto.default_bank_account.bank_code,
-            branchNumber: dto.default_bank_account.agencia,
-            branchCheckDigit: dto.default_bank_account.agencia_dv,
-            accountNumber: dto.default_bank_account.conta,
-            accountCheckDigit: dto.default_bank_account.conta_dv,
+            holderName: dto.default_bank_account.holder_name,
+            holderDocument: dto.default_bank_account.holder_document,
+            holderType: dto.default_bank_account.holder_type,
+            bank: dto.default_bank_account.bank,
+            branchNumber: dto.default_bank_account.branch_number,
+            branchCheckDigit: dto.default_bank_account.branch_check_digit,
+            accountNumber: dto.default_bank_account.account_number,
+            accountCheckDigit: dto.default_bank_account.account_check_digit,
             type: dto.default_bank_account.type,
           },
         },
