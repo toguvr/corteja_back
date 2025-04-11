@@ -104,7 +104,7 @@ export class CustomersService {
     const resend = new Resend(process.env.RESEND_API);
 
     resend.emails.send({
-      from: 'contato@nossonutri.com',
+      from: 'contato@suporte.horacerta.app',
       to: data.email,
       subject: '[HoraCerta] Recuperação de senha',
       html: `<style>

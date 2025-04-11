@@ -76,7 +76,12 @@ export class AppointmentsService {
       0,
       0,
     );
-
+    // Verificar se a data e hora do agendamento já passou
+    if (appointmentDate.getTime() < Date.now()) {
+      throw new BadRequestException(
+        'Não é possível realizar um agendamento em uma data/hora que já passou.',
+      );
+    }
     const existingAppointment = await this.prisma.appointment.findFirst({
       where: {
         customerId,

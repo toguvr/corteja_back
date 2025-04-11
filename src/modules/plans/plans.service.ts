@@ -38,7 +38,7 @@ export class PlansService {
         scheme_type: 'unit',
         price: totalAmount,
       },
-      payment_methods: ['debit_card'],
+      payment_methods: ['debit_card', 'credit_card'],
       shippable: false,
       quantity: 1,
     });
@@ -51,7 +51,7 @@ export class PlansService {
         billingType: 'prepaid',
         chargeGatewayPlanId: plano.id,
         interval,
-        price: totalAmount,
+        price: price,
         serviceId,
       },
     });

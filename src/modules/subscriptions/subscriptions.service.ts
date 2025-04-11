@@ -42,10 +42,8 @@ export class SubscriptionsService {
       plan_id: plan.chargeGatewayPlanId, // ID do plano criado
       customer_id: customer.customerChargeGatewayId,
       quantity: 1, // quantas vezes aplicar o valor do plano
-      payment_method: 'debit_card',
-
+      payment_method: 'credit_card',
       card_id: createSubscriptionDto.cardId,
-
       metadata: {
         barbershopId: createSubscriptionDto.barbershopId,
         customerId: customer?.id, // ID do cliente no seu sistema (opcional, mas muito útil)
