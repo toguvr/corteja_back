@@ -106,7 +106,7 @@ export class CustomersService {
     resend.emails.send({
       from: 'contato@nossonutri.com',
       to: data.email,
-      subject: '[CorteJa] Recuperação de senha',
+      subject: '[HoraCerta] Recuperação de senha',
       html: `<style>
   .message-content {
     font-family: Arial, Helvetica, sans-serif;
@@ -121,10 +121,10 @@ export class CustomersService {
   <p>Parece que uma troca de senha para sua conta foi solicitada.</p>
   <p>Se foi você, então clique no link abaixo para escolher uma nova senha:</p>
   <p>
-    <a href="https://nossonutri.com/redefinir-senha?token=${token}">Resetar minha senha</a>
+    <a href="https://horacerta.app/redefinir-senha?token=${token}">Resetar minha senha</a>
   </p>
   <p>Obrigado <br>
-    <strong>Equipe NossoNutri</strong>
+    <strong>Equipe HoraCerta</strong>
   </p>
 </div>`,
     });

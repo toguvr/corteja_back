@@ -125,7 +125,7 @@ export class OrdersService {
     const items = [
       {
         id: '1',
-        description: 'CorteJa',
+        description: 'HoraCerta',
         amount: totalAmount,
         quantity: 1,
         code: order?.id,
@@ -150,7 +150,7 @@ export class OrdersService {
               expires_in: '7200', // Tempo em segundos
               additional_information: [
                 {
-                  name: 'CorteJa',
+                  name: 'HoraCerta',
                   value: totalAmount,
                 },
               ],
@@ -193,7 +193,7 @@ export class OrdersService {
         chargeId: charge.id,
       };
     } else {
-      const statementDescriptor = 'CorteJa';
+      const statementDescriptor = 'HoraCerta';
 
       const ordersController = pagarme.OrdersController;
 
