@@ -247,7 +247,7 @@ export class AppointmentsService {
           customerId,
           barbershopId,
           scheduleId,
-          serviceId: plan.service.id,
+          serviceId: plan.service?.id,
           date: appointmentDate,
         },
       });
@@ -270,11 +270,18 @@ export class AppointmentsService {
     const [hours, minutes] = time.split(':').map(Number);
     const now = new Date();
 
-    const daysAhead = (weekDay + 7 - now.getDay()) % 7 || 7;
-    const nextDate = new Date(now);
+    // Começa assumindo o dia da semana desejado
+    const daysAhead = (weekDay + 7 - now.getDay()) % 7;
 
+    // Cria uma data base com esse dia e horário
+    const nextDate = new Date(now);
     nextDate.setDate(now.getDate() + daysAhead);
     nextDate.setHours(hours, minutes, 0, 0);
+
+    // Se a data cair hoje (daysAhead === 0) e o horário já passou, agenda para a próxima semana
+    if (daysAhead === 0 && nextDate <= now) {
+      nextDate.setDate(nextDate.getDate() + 7);
+    }
 
     return nextDate;
   }

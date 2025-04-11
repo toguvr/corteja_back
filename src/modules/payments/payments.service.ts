@@ -14,15 +14,17 @@ export class PaymentsService {
     const orderId = createPaymentDto?.data?.metadata?.orderId;
     const subscriptionId = createPaymentDto?.data?.metadata?.subscriptionId;
 
-    const amount = createPaymentDto?.data?.last_transaction?.amount;
-    // payment_method === 'credit_card'
-    //   ? createPaymentDto?.data?.last_transaction?.split[1]?.amount
-    //   : createPaymentDto?.data?.last_transaction?.splits[1]?.amount;
+    const amount =
+      // createPaymentDto?.data?.last_transaction?.amount;
+      payment_method === 'credit_card'
+        ? createPaymentDto?.data?.last_transaction?.split[1]?.amount
+        : createPaymentDto?.data?.last_transaction?.splits[1]?.amount;
 
-    const fee = createPaymentDto?.data?.last_transaction?.amount;
-    // payment_method === 'credit_card'
-    //   ? createPaymentDto?.data?.last_transaction?.split[0]?.amount
-    //   : createPaymentDto?.data?.last_transaction?.splits[0]?.amount;
+    const fee =
+      // createPaymentDto?.data?.last_transaction?.amount;
+      payment_method === 'credit_card'
+        ? createPaymentDto?.data?.last_transaction?.split[0]?.amount
+        : createPaymentDto?.data?.last_transaction?.splits[0]?.amount;
 
     const installments =
       createPaymentDto?.data?.last_transaction?.installments ?? '1';
