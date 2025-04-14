@@ -51,31 +51,32 @@ model Bank {
 }
 
 model Barbershop {
-  id           String         @id @default(uuid())
-  name         String
-  avatar       String?
-  code         String?
-  email        String
-  password     String
-  haveLoyalty  Boolean        @default(true)
-  fee          Int?           @default(10)
-  address      Address?       @relation(fields: [addressId], references: [id])
-  slug         String         @unique
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  barbers      Barber[]
-  services     Service[]
-  schedules    Schedule[]
-  bank         Bank?          @relation(fields: [bankId], references: [id])
-  addressId    String?
-  receiverId   String?
-  bankId       String?
-  appointments Appointment[]
-  payments     Payment[]
-  balances     Balance[]
-  orders       Order[]
-  plans        Plan[]
-  Subscription Subscription[]
+  id              String         @id @default(uuid())
+  name            String
+  avatar          String?
+  code            String?
+  email           String
+  password        String
+  haveLoyalty     Boolean        @default(true)
+  fee             Int?           @default(10)
+  minutesToCancel Int?           @default(300)
+  address         Address?       @relation(fields: [addressId], references: [id])
+  slug            String         @unique
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  barbers         Barber[]
+  services        Service[]
+  schedules       Schedule[]
+  bank            Bank?          @relation(fields: [bankId], references: [id])
+  addressId       String?
+  receiverId      String?
+  bankId          String?
+  appointments    Appointment[]
+  payments        Payment[]
+  balances        Balance[]
+  orders          Order[]
+  plans           Plan[]
+  Subscription    Subscription[]
 
   @@map("barbershops")
 }

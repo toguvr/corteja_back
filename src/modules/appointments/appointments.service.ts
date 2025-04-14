@@ -114,7 +114,16 @@ export class AppointmentsService {
 
     if (userBalance < serviceAmount) {
       throw new BadRequestException(
-        `Saldo insuficiente! Saldo atual: ${userBalance}, Valor do serviço: ${serviceAmount}`,
+        `Saldo insuficiente! Saldo atual: ${(userBalance / 100).toLocaleString(
+          'pt-BR',
+          {
+            style: 'currency',
+            currency: 'BRL',
+          },
+        )}, Valor do serviço: ${(serviceAmount / 100).toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        })}`,
       );
     }
 
@@ -412,10 +421,23 @@ export class AppointmentsService {
   async remove(id: string) {
     const appointment = await this.prisma.appointment.findFirst({
       where: { id },
-      include: { service: true },
+      include: { service: true, barbershop: true },
     });
     if (!appointment) {
       throw new BadRequestException('Agendamento não encontrado.');
+    }
+
+    const minutesToCancel = appointment.barbershop?.minutesToCancel ?? 0;
+
+    const now = new Date();
+    const appointmentDate = new Date(appointment.date);
+    const diffInMs = appointmentDate.getTime() - now.getTime();
+    const diffInMinutes = Math.floor(diffInMs / 1000 / 60);
+
+    if (diffInMinutes < minutesToCancel) {
+      throw new BadRequestException(
+        `Agendamento não pode ser cancelado com menos de ${minutesToCancel} minutos de antecedência.`,
+      );
     }
     // Criar balance
     await this.prisma.balance.create({
