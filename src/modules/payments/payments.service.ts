@@ -5,7 +5,11 @@ import axios from 'axios';
 @Injectable()
 export class PaymentsService {
   constructor(private readonly prisma: PrismaService) {}
-
+  calcularPartesPorPercentual(percentualY: number, total: number) {
+    const y = +(total * (percentualY / 100));
+    const x = +(total - y);
+    return { x: Math.round(x), y: Math.round(y) };
+  }
   async create(createPaymentDto) {
     const payment_method = createPaymentDto?.data?.payment_method;
     const total = createPaymentDto?.data?.amount;
@@ -14,17 +18,44 @@ export class PaymentsService {
     const orderId = createPaymentDto?.data?.metadata?.orderId;
     const subscriptionId = createPaymentDto?.data?.metadata?.subscriptionId;
 
-    const amount =
-      // createPaymentDto?.data?.last_transaction?.amount;
-      payment_method === 'credit_card'
-        ? createPaymentDto?.data?.last_transaction?.split[1]?.amount
-        : createPaymentDto?.data?.last_transaction?.splits[1]?.amount;
+    let amount = 0;
+    let fee = 0;
+    if (payment_method === 'credit_card') {
+      // createPaymentDto?.data?.last_transaction?.amount
 
-    const fee =
-      // createPaymentDto?.data?.last_transaction?.amount;
-      payment_method === 'credit_card'
-        ? createPaymentDto?.data?.last_transaction?.split[0]?.amount
-        : createPaymentDto?.data?.last_transaction?.splits[0]?.amount;
+      if (
+        createPaymentDto?.data?.last_transaction?.split[1]?.type ===
+        'percentage'
+      ) {
+        if (subscriptionId) {
+          const currentSubscription = await this.prisma.subscription.findFirst({
+            where: { id: subscriptionId },
+            include: {
+              plan: true,
+            },
+          });
+          amount = currentSubscription?.plan?.price || 0;
+          fee = total - amount;
+        } else {
+          amount = this.calcularPartesPorPercentual(
+            createPaymentDto?.data?.last_transaction?.split[1]?.amount,
+            total,
+          ).y;
+          fee = this.calcularPartesPorPercentual(
+            createPaymentDto?.data?.last_transaction?.split[0]?.amount,
+            total,
+          ).y;
+        }
+      } else {
+        amount = createPaymentDto?.data?.last_transaction?.split[1]?.amount;
+        fee = createPaymentDto?.data?.last_transaction?.split[0]?.amount;
+      }
+    } else {
+      // createPaymentDto?.data?.last_transaction?.amount
+      //nao pode ser percentage em pix.
+      amount = createPaymentDto?.data?.last_transaction?.splits[1]?.amount;
+      fee = createPaymentDto?.data?.last_transaction?.splits[0]?.amount;
+    }
 
     const installments =
       createPaymentDto?.data?.last_transaction?.installments ?? '1';

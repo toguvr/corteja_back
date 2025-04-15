@@ -24,9 +24,9 @@ export class PlansService {
       throw new ConflictException('Empresa não encontrado.');
     }
     const price = service?.amount || 0;
-    const fee = price * (Number(barbershop?.fee) / 100);
+    const fee = Math.round(price * (Number(barbershop?.fee) / 100));
 
-    const totalAmount = price + fee;
+    const totalAmount = Math.round(price + fee);
 
     // const planRequest = new pagarme.CreatePlanRequest({
     //   name: `Plano ${interval === 'week' ? 'semanal' : 'mensal'} Pix`,
@@ -80,6 +80,14 @@ export class PlansService {
   }
 
   async remove(id: string) {
+    const subscriptions = await this.prisma.subscription.findFirst({
+      where: { active: true, planId: id },
+    });
+    if (subscriptions) {
+      throw new ConflictException(
+        'Não foi possivel excluir, existem assinaturas ativas neste plano.',
+      );
+    }
     return await this.prisma.plan.delete({ where: { id } });
   }
 }

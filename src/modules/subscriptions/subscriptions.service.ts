@@ -12,6 +12,16 @@ pagarme.Configuration.basicAuthUserName = privateKey;
 export class SubscriptionsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  calcularPercentuaisPrecisos(x: number, y: number) {
+    const total = x + y;
+    if (total === 0) return { x: 0, y: 0 };
+
+    const percentualX = +((x / total) * 100);
+    const percentualY = +(100 - percentualX);
+
+    return { x: Math.round(percentualX), y: Math.round(percentualY) };
+  }
+
   async create(createSubscriptionDto) {
     const customer = await this.prisma.customer.findUnique({
       where: { id: createSubscriptionDto?.customerId as string },
@@ -24,6 +34,7 @@ export class SubscriptionsService {
     }
     const plan = await this.prisma.plan.findUnique({
       where: { id: createSubscriptionDto?.planId as string },
+      include: { barbershop: true },
     });
     if (!plan) {
       throw new ConflictException('Plano não encontrado.');
@@ -38,17 +49,61 @@ export class SubscriptionsService {
         scheduleId: createSubscriptionDto.scheduleId,
       },
     });
+    const amount = Math.round(Number(plan.price));
+
+    const fee = Math.round(amount * (Number(plan?.barbershop?.fee) / 100));
+
+    const totalAmount = Math.round(amount + fee);
+    const items = [
+      {
+        id: '1',
+        description: 'HoraCerta',
+        pricing_scheme: {
+          price: totalAmount,
+        },
+        quantity: 1,
+        code: subscription?.id,
+      },
+    ];
+    const percentageToSplit = this.calcularPercentuaisPrecisos(fee, amount);
+    const split = {
+      enabled: true,
+      rules: [
+        {
+          amount: percentageToSplit.x,
+          recipient_id: process.env.PAGARME_RECEIVER_ID,
+          type: 'percentage',
+          options: {
+            charge_processing_fee: true,
+            charge_remainder_fee: true,
+            liable: true,
+          },
+        },
+        {
+          amount:
+            percentageToSplit.x + percentageToSplit.y === 100
+              ? percentageToSplit.y
+              : 100 - percentageToSplit.x,
+          type: 'percentage',
+          recipient_id: plan?.barbershop?.receiverId,
+          options: {
+            charge_processing_fee: false,
+            charge_remainder_fee: false,
+            liable: false,
+          },
+        },
+      ],
+    };
+
     const assinaturaRequest = new pagarme.CreateSubscriptionRequest({
       // plan_id: plan.chargeGatewayPlanId, // ID do plano criado
-      pricing_scheme: {
-        scheme_type: 'unit',
-        price: Math.round(Number(plan.price)),
-      },
+      items,
       customer_id: customer.customerChargeGatewayId,
       quantity: 1, // quantas vezes aplicar o valor do plano
       payment_method: 'credit_card',
       description: `Assinatura ${plan?.interval === 'week' ? 'semanal' : 'mensal'}`,
       card_id: createSubscriptionDto.cardId,
+      split,
       metadata: {
         barbershopId: createSubscriptionDto.barbershopId,
         customerId: customer?.id, // ID do cliente no seu sistema (opcional, mas muito útil)
