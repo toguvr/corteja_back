@@ -70,14 +70,10 @@ export class AppointmentsService {
     }
     // 6. Verificar se o usuário já tem um agendamento no mesmo dia e horário
     const appointmentDate = new Date(date);
-    appointmentDate.setHours(
-      parseInt(schedule?.time.split(':')[0]),
-      parseInt(schedule?.time.split(':')[1]),
-      0,
-      0,
-    );
+
+    const now = new Date();
     // Verificar se a data e hora do agendamento já passou
-    if (appointmentDate.getTime() < Date.now()) {
+    if (appointmentDate < now) {
       throw new BadRequestException(
         'Não é possível realizar um agendamento em uma data/hora que já passou.',
       );
@@ -85,14 +81,14 @@ export class AppointmentsService {
     const existingAppointment = await this.prisma.appointment.findFirst({
       where: {
         customerId,
-        barbershopId,
         date: appointmentDate,
       },
+      include: { barbershop: true },
     });
 
     if (existingAppointment) {
       throw new BadRequestException(
-        'Você já tem um agendamento para esse horário no mesmo dia.',
+        `Você já tem um agendamento para esse horário no mesmo dia em ${existingAppointment.barbershop.name}.`,
       );
     }
 
