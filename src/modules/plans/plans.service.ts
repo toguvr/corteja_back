@@ -28,28 +28,28 @@ export class PlansService {
 
     const totalAmount = price + fee;
 
-    const planRequest = new pagarme.CreatePlanRequest({
-      name: `Plano ${interval === 'week' ? 'semanal' : 'mensal'} Pix`,
-      description: `Assinatura ${interval === 'week' ? 'semanal' : 'mensal'} paga com Pix`,
-      interval: interval ? 'week' : 'month',
-      interval_count: 1,
-      billing_type: 'prepaid',
-      pricing_scheme: {
-        scheme_type: 'unit',
-        price: totalAmount,
-      },
-      payment_methods: ['debit_card', 'credit_card'],
-      shippable: false,
-      quantity: 1,
-    });
+    // const planRequest = new pagarme.CreatePlanRequest({
+    //   name: `Plano ${interval === 'week' ? 'semanal' : 'mensal'} Pix`,
+    //   description: `Assinatura ${interval === 'week' ? 'semanal' : 'mensal'} paga com Pix`,
+    //   interval: interval ? 'week' : 'month',
+    //   interval_count: 1,
+    //   billing_type: 'prepaid',
+    //   pricing_scheme: {
+    //     scheme_type: 'unit',
+    //     price: totalAmount,
+    //   },
+    //   payment_methods: ['debit_card', 'credit_card'],
+    //   shippable: false,
+    //   quantity: 1,
+    // });
 
-    const plano = await pagarme.PlansController.createPlan(planRequest);
+    // const plano = await pagarme.PlansController.createPlan(planRequest);
 
     const response = await this.prisma.plan.create({
       data: {
         barbershopId,
         billingType: 'prepaid',
-        chargeGatewayPlanId: plano.id,
+        // chargeGatewayPlanId: plano.id,
         interval,
         price: price,
         serviceId,

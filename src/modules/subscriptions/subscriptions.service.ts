@@ -40,7 +40,10 @@ export class SubscriptionsService {
     });
     const assinaturaRequest = new pagarme.CreateSubscriptionRequest({
       // plan_id: plan.chargeGatewayPlanId, // ID do plano criado
-      pricing_scheme: { scheme_type: 'unit', price: plan.price },
+      pricing_scheme: {
+        scheme_type: 'unit',
+        price: Math.round(Number(plan.price)),
+      },
       customer_id: customer.customerChargeGatewayId,
       quantity: 1, // quantas vezes aplicar o valor do plano
       payment_method: 'credit_card',

@@ -69,14 +69,13 @@ export class OrdersService {
 
     const totalInstallments = Number(installments) || 1;
 
-    const amount = services.reduce(
-      (acc, service) => acc + Number(service.amount),
-      0,
+    const amount = Math.round(
+      services.reduce((acc, service) => acc + Number(service.amount), 0),
     );
 
-    const fee = amount * (Number(barbershop.fee) / 100);
+    const fee = Math.round(amount * (Number(barbershop.fee) / 100));
 
-    const totalAmount = amount + fee;
+    const totalAmount = Math.round(amount + fee);
 
     const order = await this.prisma.order.create({
       data: {
