@@ -22,8 +22,7 @@ export class StampsService {
       where: {
         customerId,
         barbershopId,
-        type: 'LOYALTY_REWARD',
-        status: 'received',
+        status: 'LOYALTY_REWARD',
       },
     });
     const barbershop = await this.prisma.barbershop.findFirst({
@@ -41,8 +40,8 @@ export class StampsService {
           customerId,
           barbershopId,
           amount: barbershop?.loyaltyReward ?? 4000,
-          status: 'received',
-          type: 'LOYALTY_REWARD',
+          status: 'LOYALTY_REWARD',
+          type: 'INCOME',
           paymentDate: new Date(),
         },
       });
