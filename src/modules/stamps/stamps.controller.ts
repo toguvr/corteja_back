@@ -28,7 +28,7 @@ export class StampsController {
   findAll() {
     return this.stampsService.findAll();
   }
-  @Get(':barbershopId')
+  @Get('/barbershop/:barbershopId')
   count(
     @CurrentUser() user: UserPayload,
     @Param('barbershopId') barbershopId: string,
