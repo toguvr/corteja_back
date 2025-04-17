@@ -280,7 +280,7 @@ export class AppointmentsService {
     const [hours, minutes] = time.split(':').map(Number);
     const now = new Date();
 
-    // Começa assumindo o dia da semana desejado
+    // Calcula quantos dias à frente está o próximo dia da semana desejado
     const daysAhead = (weekDay + 7 - now.getDay()) % 7;
 
     // Cria uma data base com esse dia e horário
@@ -292,6 +292,9 @@ export class AppointmentsService {
     if (daysAhead === 0 && nextDate <= now) {
       nextDate.setDate(nextDate.getDate() + 7);
     }
+
+    // Ajusta de horário de Brasília (UTC-3) para UTC: adiciona 3 horas
+    nextDate.setHours(nextDate.getHours() + 3);
 
     return nextDate;
   }

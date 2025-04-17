@@ -102,6 +102,21 @@ export class PaymentsService {
         },
       });
     }
+
+    const barbershop = await this.prisma.barbershop.findFirst({
+      where: { id: barbershopId },
+    });
+    const minAmountToStamp = barbershop?.minAmountToStamp || 0;
+
+    if (barbershop?.haveLoyalty && minAmountToStamp <= total) {
+      await this.prisma.loyaltyStamp.create({
+        data: {
+          barbershopId,
+          customerId,
+          paymentId: payment.id,
+        },
+      });
+    }
     return payment;
   }
 
