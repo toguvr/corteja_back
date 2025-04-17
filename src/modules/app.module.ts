@@ -16,6 +16,7 @@ import { CustomersModule } from './customers/customers.module';
 import { OrdersModule } from './orders/orders.module';
 import { PlansModule } from './plans/plans.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { StampsModule } from './stamps/stamps.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
     BarbersModule,
     ServicesModule,
     PaymentsModule,
+    StampsModule,
     BalancesModule,
     PlansModule,
     SubscriptionsModule,
