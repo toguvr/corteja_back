@@ -64,7 +64,13 @@ export class StampsService {
       where: { id: barbershopId },
     });
     const requiredStamps = barbershop?.loyaltyStamps ?? 10;
-
+    const totalRewards = await this.prisma.balance.count({
+      where: {
+        customerId,
+        barbershopId,
+        status: 'LOYALTY_REWARD',
+      },
+    });
     const totalStamps = await this.prisma.loyaltyStamp.count({
       where: {
         customerId,
@@ -78,7 +84,7 @@ export class StampsService {
     // selos atuais do ciclo em andamento
     const currentStamps = totalStamps % requiredStamps;
 
-    return { totalStamps: currentStamps, completedCycles };
+    return { totalStamps: currentStamps, completedCycles, totalRewards };
   }
 
   async findOne(id: string) {
