@@ -22,6 +22,14 @@ export class PaymentsController {
     return this.paymentsService.create(createPaymentDto);
   }
 
+  @Post('barbershop/withdraw')
+  createWithdraw(@CurrentUser() user, @Body() createPaymentDto) {
+    return this.paymentsService.createWithdraw(
+      user.sub,
+      createPaymentDto.amount,
+    );
+  }
+
   @Get()
   findAll() {
     return this.paymentsService.findAll();
@@ -34,6 +42,10 @@ export class PaymentsController {
   @Get('barbershop')
   findAllByBarbershop(@CurrentUser() user) {
     return this.paymentsService.findAllByBarbershop(user?.sub);
+  }
+  @Get('barbershop/withdrawals')
+  findAllWithdrawsByBarbershop(@CurrentUser() user) {
+    return this.paymentsService.findAllWithdrawalsByBarbershop(user?.sub);
   }
 
   @Get(':id')

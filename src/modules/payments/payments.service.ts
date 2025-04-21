@@ -159,6 +159,49 @@ export class PaymentsService {
 
     return response.data;
   }
+  async findAllWithdrawalsByBarbershop(barbershopId: string) {
+    const barbershop = await this.prisma.barbershop.findUnique({
+      where: { id: barbershopId },
+    });
+    if (!barbershop) {
+      throw new BadRequestException('Empresa não encontrada.');
+    }
+    const response = await axios.get(
+      `https://api.pagar.me/core/v5/recipients/${barbershop?.receiverId}/withdrawals`,
+      {
+        headers: {
+          Authorization: `Basic ${Buffer.from(
+            process.env.PAGARME_API + ':',
+          ).toString('base64')}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    return response.data;
+  }
+  async createWithdraw(barbershopId: string, amount: number) {
+    const barbershop = await this.prisma.barbershop.findUnique({
+      where: { id: barbershopId },
+    });
+    if (!barbershop) {
+      throw new BadRequestException('Empresa não encontrada.');
+    }
+    const response = await axios.post(
+      `https://api.pagar.me/core/v5/recipients/${barbershop?.receiverId}/withdrawals`,
+      { amount },
+      {
+        headers: {
+          Authorization: `Basic ${Buffer.from(
+            process.env.PAGARME_API + ':',
+          ).toString('base64')}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    return response.data;
+  }
 
   async findOne(id: string) {
     return await this.prisma.payment.findFirst({ where: { id } });
