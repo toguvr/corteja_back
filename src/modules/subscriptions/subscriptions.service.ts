@@ -98,6 +98,9 @@ export class SubscriptionsService {
     const assinaturaRequest = new pagarme.CreateSubscriptionRequest({
       // plan_id: plan.chargeGatewayPlanId, // ID do plano criado
       items,
+      billing_type: 'prepaid', // ou 'postpaid', depende da lógica do seu app
+      interval: plan?.interval, // <- aqui define a recorrência semanal
+      interval_count: 1, // a cada 1 semana
       customer_id: customer.customerChargeGatewayId,
       quantity: 1, // quantas vezes aplicar o valor do plano
       payment_method: 'credit_card',
