@@ -138,16 +138,21 @@ export class ChatsService {
     return newDate;
   }
   isValidTime(value: string): boolean {
+    if (!value) return false;
+
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
     return timeRegex.test(value.trim());
   }
   isEmail(value: string): boolean {
+    if (!value) return false;
     return validator.isEmail(value.trim());
   }
   getFirstName(fullName: string): string {
     return fullName.trim().split(' ')[0];
   }
   isValidCPF(cpf: string): boolean {
+    if (!cpf) return false;
+
     cpf = cpf.replace(/\D/g, '');
 
     if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
@@ -457,15 +462,19 @@ export class ChatsService {
       },
       include: { barbershop: true, service: true },
     });
-    if (existChatByPhone && !existChatByPhone?.finished&& createChatDto?.text?.message === 'resetar') {
+    if (
+      existChatByPhone &&
+      !existChatByPhone?.finished &&
+      createChatDto?.text?.message.toLowerCase() === 'resetar'
+    ) {
       await this.prisma.chat.update({
         where: { id: existChatByPhone.id },
         data: {
           finished: true,
+          barbershopId: null,
         },
       });
-return
-      return await this.create(createChatDto);
+      return await this.create({ ...createChatDto, text: { message: '' } });
     }
     if (!existChatByPhone) {
       await this.prisma.chat.create({
@@ -494,7 +503,7 @@ return
           const emailAnswered = createChatDto?.text?.message;
           if (this.isEmail(emailAnswered)) {
             const existEmail = await this.prisma.customer.findFirst({
-              where: { email: emailAnswered },
+              where: { email: emailAnswered.toLowerCase() },
             });
             if (existEmail) {
               return await whatsApi.post('/send-text', {
@@ -793,7 +802,7 @@ return
           type: 'EVP',
         });
       }
-      // return await whatsApi.post('/send-text', {
+      return await whatsApi.post('/send-text', {
         phone: phone,
         delayMessage: 5,
         message: 'Se deseja resetar o agendamento, digite: *resetar*',
