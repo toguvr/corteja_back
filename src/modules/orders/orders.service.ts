@@ -17,6 +17,7 @@ export class OrdersService {
     installments,
     isPix,
     card,
+    whatsapp,
   }: CreateOrderDto) {
     if (cartIds && cartIds.length === 0) {
       throw new BadRequestException('Nenhum produto selecionado');
@@ -136,6 +137,7 @@ export class OrdersService {
       orderId: order.id,
       barbershopId: barbershopId,
       cartIds: JSON.stringify(cartIds),
+      whatsapp,
     };
     if (isPix) {
       const orderRequest = new pagarme.CreateOrderRequest({

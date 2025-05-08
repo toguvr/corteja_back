@@ -7,8 +7,9 @@ export class CreateOrderDto {
   document?: string;
   phone?: string;
   installments?: string;
+  whatsapp?: string;
   isPix?: boolean;
-  card: any;
+  card?: any;
   constructor(data: Partial<CreateOrderDto>) {
     Object.assign(this, data);
   }

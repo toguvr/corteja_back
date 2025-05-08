@@ -82,6 +82,7 @@ model Barbershop {
   plans            Plan[]
   subscriptions    Subscription[]
   loyaltiesStamps  LoyaltyStamp[]
+  chats            Chat[]
 
   @@map("barbershops")
 }
@@ -97,6 +98,7 @@ model Barber {
   payments      Payment[]
   schedules     Schedule[]
   subscriptions Subscription[]
+  chats         Chat[]
 
   @@map("barbers")
 }
@@ -114,6 +116,7 @@ model Service {
   appointments Appointment[]
   payments     Payment[]
   plans        Plan[]
+  chats        Chat[]
 
   @@map("services")
 }
@@ -131,6 +134,7 @@ model Schedule {
   appointments  Appointment[]
   barberId      String?
   subscriptions Subscription[]
+  chats         Chat[]
 
   @@map("schedules")
 }
@@ -156,6 +160,7 @@ model Customer {
   Order                   Order[]
   subscriptions           Subscription[]
   loyaltiesStamps         LoyaltyStamp[]
+  chats                   Chat[]
 
   @@map("customers")
 }
@@ -175,6 +180,7 @@ model Appointment {
   scheduleId   String?
   customerId   String?
   barbershopId String
+  chats        Chat[]
 
   @@map("appointments")
 }
@@ -294,4 +300,32 @@ model LoyaltyStamp {
   createdAt    DateTime   @default(now())
 
   @@map("loyaltyStamps")
+}
+
+model Chat {
+  id            String       @id @default(uuid())
+  phone         String
+  name          String?
+  email         String?
+  document      String?
+  date          String?
+  pix           String?
+  time          String?
+  finished      Boolean      @default(false)
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  customer      Customer?    @relation(fields: [customerId], references: [id])
+  barbershop    Barbershop?  @relation(fields: [barbershopId], references: [id])
+  service       Service?     @relation(fields: [serviceId], references: [id])
+  barber        Barber?      @relation(fields: [barberId], references: [id])
+  schedule      Schedule?    @relation(fields: [scheduleId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  customerId    String?
+  barbershopId  String?
+  serviceId     String?
+  barberId      String?
+  appointmentId String?
+  scheduleId    String?
+
+  @@map("chats")
 }

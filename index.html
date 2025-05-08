@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      HoraCerta - Agendamentos Inteligentes 100% Gratuito para Seu Negócio
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#000000',
+              secondary: '#FF5F00',
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .hero-gradient {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 0, 0, 0.9) 0%,
+          rgba(0, 0, 0, 0.7) 100%
+        );
+      }
+      .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(255, 95, 0, 0.2);
+      }
+      .highlight-badge {
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="bg-primary text-white sticky top-0 z-50 shadow-lg">
+      <div
+        class="container mx-auto px-6 py-4 flex justify-between items-center"
+      >
+        <div class="flex items-center">
+          <img
+            src="https://horacerta.app/criar-conta"
+            alt="HoraCerta Logo"
+            class="h-10 mr-3"
+          />
+          <span class="text-2xl font-bold text-secondary"
+            >Hora<span class="text-white">Certa</span></span
+          >
+        </div>
+        <nav class="hidden md:flex space-x-8">
+          <a href="#features" class="hover:text-secondary transition"
+            >Recursos</a
+          >
+          <a href="#how-it-works" class="hover:text-secondary transition"
+            >Como Funciona</a
+          >
+          <a href="#pricing" class="hover:text-secondary transition">Taxas</a>
+          <a href="#testimonials" class="hover:text-secondary transition"
+            >Depoimentos</a
+          >
+        </nav>
+        <a
+          href="https://horacerta.app/criar-empresa"
+          class="bg-secondary hover:bg-orange-600 text-white px-6 py-2 rounded-full font-medium transition shadow-lg"
+        >
+          Criar minha conta
+        </a>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20 md:py-32">
+      <div
+        class="container mx-auto px-6 flex flex-col md:flex-row items-center"
+      >
+        <div class="md:w-1/2 mb-12 md:mb-0">
+          <div
+            class="bg-secondary text-white inline-block px-4 py-1 rounded-full mb-4 text-sm font-bold highlight-badge"
+          >
+            100% GRATUITO PARA SEU NEGÓCIO
+          </div>
+          <h1
+            class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6"
+          >
+            Agendamentos <span class="text-secondary">sem custo</span> para seu
+            estabelecimento
+          </h1>
+          <p class="text-xl text-gray-200 mb-8">
+            Controle seus horários, receba pagamentos antecipados e elimine
+            inadimplências. Sem mensalidades, sem taxas escondidas.
+          </p>
+          <div
+            class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4"
+          >
+            <a
+              href="https://horacerta.app/criar-empresa"
+              class="bg-secondary hover:bg-orange-600 text-white px-8 py-4 rounded-full font-bold text-lg transition shadow-xl flex items-center justify-center"
+            >
+              Começar agora <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+            <a
+              href="#how-it-works"
+              class="bg-white hover:bg-gray-100 text-primary px-8 py-4 rounded-full font-bold text-lg transition shadow-xl flex items-center justify-center"
+            >
+              Como funciona <i class="fas fa-play-circle ml-2"></i>
+            </a>
+          </div>
+        </div>
+        <div class="md:w-1/2 flex justify-center">
+          <div class="relative">
+            <div
+              class="absolute -top-10 -left-10 w-64 h-64 bg-secondary rounded-full opacity-20 animate-pulse"
+            ></div>
+            <div
+              class="absolute -bottom-10 -right-10 w-64 h-64 bg-secondary rounded-full opacity-20 animate-pulse delay-300"
+            ></div>
+            <div
+              class="relative bg-white rounded-2xl shadow-2xl overflow-hidden border-8 border-white"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+                alt="Dashboard HoraCerta"
+                class="w-full h-auto"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Badges -->
+    <section class="bg-gray-100 py-8">
+      <div class="container mx-auto px-6">
+        <p class="text-center text-gray-500 mb-6">
+          Já confiado por estabelecimentos em todo o Brasil
+        </p>
+        <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+          <div class="text-2xl font-bold text-gray-700">Barbearias</div>
+          <div class="text-2xl font-bold text-gray-700">Salões</div>
+          <div class="text-2xl font-bold text-gray-700">Clínicas</div>
+          <div class="text-2xl font-bold text-gray-700">Estúdios</div>
+          <div class="text-2xl font-bold text-gray-700">SPAs</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+      <div class="container mx-auto px-6">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">
+            Tudo que seu negócio precisa em um só lugar
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Recursos completos sem custo para seu estabelecimento
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Feature 1 -->
+          <div
+            class="bg-gray-50 rounded-xl p-8 feature-card transition duration-300 shadow-lg border border-gray-100"
+          >
+            <div
+              class="w-16 h-16 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center mb-6"
+            >
+              <i class="fas fa-calendar-check text-3xl text-secondary"></i>
+            </div>
+            <h3 class="text-xl font-bold text-primary mb-3">
+              Agendamentos Online
+            </h3>
+            <p class="text-gray-600">
+              Seus clientes agendam diretamente pelo link, sem necessidade de
+              ligações ou mensagens.
+            </p>
+          </div>
+
+          <!-- Feature 2 -->
+          <div
+            class="bg-gray-50 rounded-xl p-8 feature-card transition duration-300 shadow-lg border border-gray-100"
+          >
+            <div
+              class="w-16 h-16 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center mb-6"
+            >
+              <i class="fas fa-money-bill-wave text-3xl text-secondary"></i>
+            </div>
+            <h3 class="text-xl font-bold text-primary mb-3">
+              Pagamento Antecipado
+            </h3>
+            <p class="text-gray-600">
+              Receba no ato do agendamento e elimine inadimplências de clientes
+              que não comparecem.
+            </p>
+          </div>
+
+          <!-- Feature 3 -->
+          <div
+            class="bg-gray-50 rounded-xl p-8 feature-card transition duration-300 shadow-lg border border-gray-100"
+          >
+            <div
+              class="w-16 h-16 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center mb-6"
+            >
+              <i class="fas fa-sliders-h text-3xl text-secondary"></i>
+            </div>
+            <h3 class="text-xl font-bold text-primary mb-3">Controle Total</h3>
+            <p class="text-gray-600">
+              Defina horários, serviços, valores e profissionais de forma
+              simples e intuitiva.
+            </p>
+          </div>
+
+          <!-- Feature 4 -->
+          <div
+            class="bg-gray-50 rounded-xl p-8 feature-card transition duration-300 shadow-lg border border-gray-100"
+          >
+            <div
+              class="w-16 h-16 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center mb-6"
+            >
+              <i class="fas fa-bell text-3xl text-secondary"></i>
+            </div>
+            <h3 class="text-xl font-bold text-primary mb-3">
+              Lembretes Automáticos
+            </h3>
+            <p class="text-gray-600">
+              Reduza faltas com lembretes por WhatsApp e e-mail enviados
+              automaticamente.
+            </p>
+          </div>
+
+          <!-- Feature 5 -->
+          <div
+            class="bg-gray-50 rounded-xl p-8 feature-card transition duration-300 shadow-lg border border-gray-100"
+          >
+            <div
+              class="w-16 h-16 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center mb-6"
+            >
+              <i class="fas fa-chart-line text-3xl text-secondary"></i>
+            </div>
+            <h3 class="text-xl font-bold text-primary mb-3">
+              Relatórios Detalhados
+            </h3>
+            <p class="text-gray-600">
+              Acompanhe seu faturamento, serviços mais populares e desempenho
+              dos profissionais.
+            </p>
+          </div>
+
+          <!-- Feature 6 -->
+          <div
+            class="bg-gray-50 rounded-xl p-8 feature-card transition duration-300 shadow-lg border border-gray-100"
+          >
+            <div
+              class="w-16 h-16 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center mb-6"
+            >
+              <i class="fas fa-mobile-alt text-3xl text-secondary"></i>
+            </div>
+            <h3 class="text-xl font-bold text-primary mb-3">
+              Acesso em Qualquer Lugar
+            </h3>
+            <p class="text-gray-600">
+              Gerencie seu negócio pelo computador ou celular, mesmo sem
+              internet.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-20 bg-gray-50">
+      <div class="container mx-auto px-6">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">
+            Como funciona a HoraCerta
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Em poucos passos, seu negócio estará pronto para receber
+            agendamentos
+          </p>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-center">
+          <div class="md:w-1/2 mb-12 md:mb-0 md:pr-12">
+            <div class="space-y-8">
+              <!-- Step 1 -->
+              <div class="flex">
+                <div class="flex-shrink-0 mr-6">
+                  <div
+                    class="flex items-center justify-center w-12 h-12 rounded-full bg-secondary text-white font-bold text-xl"
+                  >
+                    1
+                  </div>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-primary mb-2">
+                    Cadastre seu estabelecimento
+                  </h3>
+                  <p class="text-gray-600">
+                    Crie sua conta gratuitamente e adicione informações básicas
+                    sobre seu negócio.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="flex">
+                <div class="flex-shrink-0 mr-6">
+                  <div
+                    class="flex items-center justify-center w-12 h-12 rounded-full bg-secondary text-white font-bold text-xl"
+                  >
+                    2
+                  </div>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-primary mb-2">
+                    Configure serviços e horários
+                  </h3>
+                  <p class="text-gray-600">
+                    Adicione seus serviços, valores, profissionais e horários de
+                    funcionamento.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="flex">
+                <div class="flex-shrink-0 mr-6">
+                  <div
+                    class="flex items-center justify-center w-12 h-12 rounded-full bg-secondary text-white font-bold text-xl"
+                  >
+                    3
+                  </div>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-primary mb-2">
+                    Compartilhe seu link
+                  </h3>
+                  <p class="text-gray-600">
+                    Envie seu link personalizado para clientes ou adicione ao
+                    seu Instagram e WhatsApp.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="flex">
+                <div class="flex-shrink-0 mr-6">
+                  <div
+                    class="flex items-center justify-center w-12 h-12 rounded-full bg-secondary text-white font-bold text-xl"
+                  >
+                    4
+                  </div>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-primary mb-2">
+                    Receba agendamentos e pagamentos
+                  </h3>
+                  <p class="text-gray-600">
+                    Pronto! Seus clientes já podem agendar e pagar diretamente
+                    pelo sistema.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="md:w-1/2">
+            <div
+              class="bg-white rounded-xl shadow-xl overflow-hidden border-8 border-white"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1581291518633-83b4ebd1d35e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+                alt="Demonstração HoraCerta"
+                class="w-full h-auto"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-20 bg-white">
+      <div class="container mx-auto px-6">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">
+            Modelo transparente: você só paga quando ganha
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Zero mensalidades, zero taxas escondidas
+          </p>
+        </div>
+
+        <div class="max-w-4xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Free For Business -->
+            <div
+              class="bg-gray-50 rounded-xl p-8 shadow-lg border border-gray-200"
+            >
+              <div class="mb-6">
+                <div
+                  class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 mx-auto"
+                >
+                  <i class="fas fa-check-circle text-3xl text-green-500"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-primary text-center mb-2">
+                  100% Gratuito para seu negócio
+                </h3>
+                <p class="text-gray-600 text-center">
+                  Você não paga nada para usar a plataforma
+                </p>
+              </div>
+              <ul class="space-y-4 mb-8">
+                <li class="flex items-center">
+                  <i class="fas fa-check text-secondary mr-3"></i>
+                  <span>Sem mensalidade</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-check text-secondary mr-3"></i>
+                  <span>Sem limite de agendamentos</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-check text-secondary mr-3"></i>
+                  <span>Profissionais ilimitados</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-check text-secondary mr-3"></i>
+                  <span>Todos os recursos liberados</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-check text-secondary mr-3"></i>
+                  <span>Suporte completo</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Fee Structure -->
+            <div
+              class="bg-primary rounded-xl p-8 shadow-xl relative overflow-hidden"
+            >
+              <div
+                class="absolute top-0 right-0 bg-secondary text-white px-4 py-1 text-sm font-bold"
+              >
+                TAXA JUSTA
+              </div>
+              <div class="mb-6">
+                <div
+                  class="w-16 h-16 bg-secondary bg-opacity-20 rounded-full flex items-center justify-center mb-4 mx-auto"
+                >
+                  <i class="fas fa-percentage text-3xl text-secondary"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white text-center mb-2">
+                  Apenas 5% por pagamento
+                </h3>
+                <p class="text-gray-300 text-center">
+                  Você escolhe quem paga a taxa
+                </p>
+              </div>
+              <ul class="space-y-4 mb-8">
+                <li class="flex items-center">
+                  <i class="fas fa-check text-secondary mr-3"></i>
+                  <span class="text-white"
+                    >Taxa única de 5% sobre cada pagamento</span
+                  >
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-check text-secondary mr-3"></i>
+                  <span class="text-white"
+                    >Você decide: assume ou repassa ao cliente</span
+                  >
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-check text-secondary mr-3"></i>
+                  <span class="text-white"
+                    >Sem custo para agendamentos sem pagamento</span
+                  >
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-check text-secondary mr-3"></i>
+                  <span class="text-white">Saque rápido para sua conta</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-check text-secondary mr-3"></i>
+                  <span class="text-white"
+                    >Transparência total nos valores</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mt-12 text-center">
+            <p class="text-gray-600 mb-6">
+              Nosso sucesso depende do seu! Só ganhamos quando você recebe.
+            </p>
+            <a
+              href="https://horacerta.app/criar-empresa"
+              class="inline-block bg-secondary hover:bg-orange-600 text-white px-10 py-4 rounded-full font-bold text-lg transition shadow-xl"
+            >
+              Começar agora gratuitamente
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="py-20 bg-gray-50">
+      <div class="container mx-auto px-6">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">
+            O que nossos clientes dizem
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Donos de estabelecimentos que já usam a HoraCerta
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Testimonial 1 -->
+          <div class="bg-white rounded-xl p-8 shadow-lg">
+            <div class="flex items-center mb-6">
+              <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                <img
+                  src="https://randomuser.me/api/portraits/women/43.jpg"
+                  alt="Cliente"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <h4 class="font-bold text-primary">Ana Carolina</h4>
+                <p class="text-gray-500 text-sm">Dona de salão de beleza</p>
+              </div>
+            </div>
+            <p class="text-gray-600 mb-4">
+              "Desde que comecei a usar a HoraCerta, minhas faltas caíram 90%.
+              Os clientes pagam na hora do agendamento e os lembretes
+              automáticos são perfeitos!"
+            </p>
+            <div class="flex text-yellow-400">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+            </div>
+          </div>
+
+          <!-- Testimonial 2 -->
+          <div class="bg-white rounded-xl p-8 shadow-lg">
+            <div class="flex items-center mb-6">
+              <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                <img
+                  src="https://randomuser.me/api/portraits/men/32.jpg"
+                  alt="Cliente"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <h4 class="font-bold text-primary">Ricardo Almeida</h4>
+                <p class="text-gray-500 text-sm">Barbeiro</p>
+              </div>
+            </div>
+            <p class="text-gray-600 mb-4">
+              "Finalmente parei de perder tempo com ligações e mensagens. Meus
+              clientes agendam direto pelo link no meu Instagram. A taxa de 5%
+              vale cada centavo!"
+            </p>
+            <div class="flex text-yellow-400">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+            </div>
+          </div>
+
+          <!-- Testimonial 3 -->
+          <div class="bg-white rounded-xl p-8 shadow-lg">
+            <div class="flex items-center mb-6">
+              <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                <img
+                  src="https://randomuser.me/api/portraits/women/65.jpg"
+                  alt="Cliente"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <h4 class="font-bold text-primary">Fernanda Lima</h4>
+                <p class="text-gray-500 text-sm">Dona de estúdio de tatuagem</p>
+              </div>
+            </div>
+            <p class="text-gray-600 mb-4">
+              "O sistema de pagamento antecipado mudou meu negócio. Antes tinha
+              muitos clientes que marcavam e não vinham. Agora recebo antes e
+              trabalho tranquila."
+            </p>
+            <div class="flex text-yellow-400">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-primary text-white">
+      <div class="container mx-auto px-6 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">
+          Pronto para transformar seu negócio sem custo?
+        </h2>
+        <p class="text-xl text-gray-200 max-w-2xl mx-auto mb-8">
+          Cadastre-se agora e comece a receber agendamentos com pagamentos
+          garantidos em minutos.
+        </p>
+        <a
+          href="https://horacerta.app/criar-empresa"
+          class="inline-block bg-secondary hover:bg-orange-600 text-white px-10 py-4 rounded-full font-bold text-lg transition shadow-xl"
+        >
+          Criar minha conta gratuitamente
+        </a>
+        <p class="mt-4 text-gray-300">Sem mensalidades, sem compromisso.</p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-20 bg-white">
+      <div class="container mx-auto px-6 max-w-4xl">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">
+            Perguntas frequentes
+          </h2>
+          <p class="text-xl text-gray-600">
+            Tire suas dúvidas sobre a HoraCerta
+          </p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- FAQ 1 -->
+          <div class="border border-gray-200 rounded-xl overflow-hidden">
+            <button
+              class="faq-toggle w-full flex justify-between items-center p-6 bg-gray-50 hover:bg-gray-100 transition"
+            >
+              <span class="text-lg font-medium text-primary text-left"
+                >Realmente não tem custo para meu estabelecimento?</span
+              >
+              <i class="fas fa-chevron-down text-secondary"></i>
+            </button>
+            <div class="faq-content hidden p-6 border-t border-gray-200">
+              <p class="text-gray-600">
+                Sim! A HoraCerta é 100% gratuita para estabelecimentos. Não
+                cobramos mensalidade, taxa de cadastro ou qualquer outro valor.
+                Nosso modelo é baseado apenas em uma pequena taxa de 5% sobre os
+                pagamentos processados, que você pode optar por assumir ou
+                repassar ao cliente.
+              </p>
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="border border-gray-200 rounded-xl overflow-hidden">
+            <button
+              class="faq-toggle w-full flex justify-between items-center p-6 bg-gray-50 hover:bg-gray-100 transition"
+            >
+              <span class="text-lg font-medium text-primary text-left"
+                >Como funcionam os pagamentos?</span
+              >
+              <i class="fas fa-chevron-down text-secondary"></i>
+            </button>
+            <div class="faq-content hidden p-6 border-t border-gray-200">
+              <p class="text-gray-600">
+                Os clientes pagam no momento do agendamento através de cartão de
+                crédito ou Pix. Você recebe o valor menos nossa taxa de
+                processamento de 5%, que pode ser assumida por você ou repassada
+                ao cliente. O saque para sua conta bancária é rápido e simples.
+              </p>
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="border border-gray-200 rounded-xl overflow-hidden">
+            <button
+              class="faq-toggle w-full flex justify-between items-center p-6 bg-gray-50 hover:bg-gray-100 transition"
+            >
+              <span class="text-lg font-medium text-primary text-left"
+                >Posso usar sem cobrar dos clientes?</span
+              >
+              <i class="fas fa-chevron-down text-secondary"></i>
+            </button>
+            <div class="faq-content hidden p-6 border-t border-gray-200">
+              <p class="text-gray-600">
+                Sim! Você pode configurar para oferecer agendamentos sem
+                pagamento antecipado. Nesses casos, não há nenhuma taxa. Apenas
+                quando há processamento de pagamento que aplicamos nossa pequena
+                taxa de 5%.
+              </p>
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="border border-gray-200 rounded-xl overflow-hidden">
+            <button
+              class="faq-toggle w-full flex justify-between items-center p-6 bg-gray-50 hover:bg-gray-100 transition"
+            >
+              <span class="text-lg font-medium text-primary text-left"
+                >E se eu precisar de ajuda?</span
+              >
+              <i class="fas fa-chevron-down text-secondary"></i>
+            </button>
+            <div class="faq-content hidden p-6 border-t border-gray-200">
+              <p class="text-gray-600">
+                Temos um time de suporte pronto para te ajudar por e-mail e
+                WhatsApp. Também temos tutoriais em vídeo e um centro de ajuda
+                completo para você configurar tudo sozinho, se preferir.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-white py-12">
+      <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div>
+            <div class="flex items-center mb-6">
+              <img
+                src="https://horacerta.app/criar-conta"
+                alt="HoraCerta Logo"
+                class="h-8 mr-3"
+              />
+              <span class="text-xl font-bold text-secondary"
+                >Hora<span class="text-white">Certa</span></span
+              >
+            </div>
+            <p class="text-gray-300 mb-4">
+              A solução perfeita para agendamentos e pagamentos do seu negócio.
+            </p>
+            <div class="flex space-x-4">
+              <a href="#" class="text-gray-300 hover:text-secondary transition"
+                ><i class="fab fa-facebook-f"></i
+              ></a>
+              <a href="#" class="text-gray-300 hover:text-secondary transition"
+                ><i class="fab fa-instagram"></i
+              ></a>
+              <a href="#" class="text-gray-300 hover:text-secondary transition"
+                ><i class="fab fa-whatsapp"></i
+              ></a>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-bold mb-6">Links úteis</h4>
+            <ul class="space-y-3">
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-300 hover:text-secondary transition"
+                  >Central de ajuda</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-300 hover:text-secondary transition"
+                  >Tutoriais em vídeo</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-300 hover:text-secondary transition"
+                  >Blog</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-300 hover:text-secondary transition"
+                  >Termos de uso</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-300 hover:text-secondary transition"
+                  >Política de privacidade</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-bold mb-6">Para empresas</h4>
+            <ul class="space-y-3">
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-300 hover:text-secondary transition"
+                  >Barbearias</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-300 hover:text-secondary transition"
+                  >Salões de beleza</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-300 hover:text-secondary transition"
+                  >Clínicas</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-300 hover:text-secondary transition"
+                  >Estúdios</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-300 hover:text-secondary transition"
+                  >SPAs</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-bold mb-6">Contato</h4>
+            <ul class="space-y-3">
+              <li class="flex items-center">
+                <i class="fas fa-envelope text-secondary mr-3"></i>
+                <span>contato@horacerta.app</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-phone-alt text-secondary mr-3"></i>
+                <span>(11) 98765-4321</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-map-marker-alt text-secondary mr-3"></i>
+                <span>São Paulo - SP</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div
+          class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400"
+        >
+          <p>&copy; 2023 HoraCerta. Todos os direitos reservados.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // FAQ toggle functionality
+      document.querySelectorAll('.faq-toggle').forEach((button) => {
+        button.addEventListener('click', () => {
+          const content = button.nextElementSibling;
+          const icon = button.querySelector('i');
+
+          content.classList.toggle('hidden');
+          icon.classList.toggle('fa-chevron-down');
+          icon.classList.toggle('fa-chevron-up');
+        });
+      });
+
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

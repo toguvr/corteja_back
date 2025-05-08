@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { PrismaService } from '@/core/database/prisma.service';
 import axios from 'axios';
+import whatsApi from '@/core/services/whats';
 @Injectable()
 export class PaymentsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -13,6 +14,7 @@ export class PaymentsService {
   async create(createPaymentDto) {
     const payment_method = createPaymentDto?.data?.payment_method;
     const total = createPaymentDto?.data?.amount;
+    const whatsapp = createPaymentDto?.data?.metadata?.whatsapp;
     const barbershopId = createPaymentDto?.data?.metadata?.barbershopId;
     const customerId = createPaymentDto?.data?.metadata?.customerId;
     const orderId = createPaymentDto?.data?.metadata?.orderId;
@@ -114,6 +116,26 @@ export class PaymentsService {
           barbershopId,
           customerId,
           paymentId: payment.id,
+        },
+      });
+    }
+    if (whatsapp) {
+      await whatsApi.post('/send-button-list', {
+        phone: whatsapp,
+        delayMessage: 5,
+        message:
+          'Pagamento recebido com sucesso! agendar no dia e horário escolhido?',
+        buttonList: {
+          buttons: [
+            {
+              id: 'sim',
+              label: 'Sim',
+            },
+            {
+              id: 'resetar',
+              label: 'Não',
+            },
+          ],
         },
       });
     }

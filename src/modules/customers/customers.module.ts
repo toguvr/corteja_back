@@ -13,5 +13,6 @@ import CryptHashProvider from '@/core/providers/hash/implementations/crypt-hash.
       useClass: CryptHashProvider,
     },
   ],
+  exports: [CustomersService],
 })
 export class CustomersModule {}

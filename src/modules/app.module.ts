@@ -17,6 +17,7 @@ import { OrdersModule } from './orders/orders.module';
 import { PlansModule } from './plans/plans.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { StampsModule } from './stamps/stamps.module';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { StampsModule } from './stamps/stamps.module';
     CustomersModule,
     BarbershopsModule,
     OrdersModule,
+    ChatsModule,
     ConfigModule.forRoot({
       validate: (env) => envSchema.parse(env),
       isGlobal: true,
