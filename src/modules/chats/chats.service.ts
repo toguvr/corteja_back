@@ -583,7 +583,7 @@ export class ChatsService {
             });
             await whatsApi.post('/send-text', {
               phone: phone,
-              message: `${firstName}, sua conta foi criada com sucesso!\r\n Agora você pode também fazer se agendar pelo site usando o email:\r\n${existChatByPhone.email} \r\n a senha: *_${password}_*\r\nno site: \r\nhttps://horacerta.app\r\n\r\nAgora, vamos continuar com o agendamento aqui mesmo do seu horário!`,
+              message: `${firstName}, sua conta foi criada com sucesso!\r\n Agora você pode também se agendar usando o email:\r\n${existChatByPhone.email.toLowerCase()} \r\n a senha:\r\n *_${password}_*\r\nno site: \r\nhttps://horacerta.app\r\n\r\nAgora, vamos continuar com o agendamento aqui mesmo do seu horário!`,
               delayMessage: 5,
             });
             return await this.create(createChatDto);
@@ -631,19 +631,20 @@ export class ChatsService {
     }
     if (!existChatByPhone.barberId) {
       const barberId = createChatDto?.listResponseMessage?.selectedRowId;
-
-      const barber = await this.prisma.barber.findFirst({
-        where: { id: barberId },
-      });
-      if (barber) {
-        await this.prisma.chat.update({
-          where: { id: existChatByPhone.id },
-          data: {
-            barberId,
-          },
+      if (barberId) {
+        const barber = await this.prisma.barber.findFirst({
+          where: { id: barberId },
         });
+        if (barber) {
+          await this.prisma.chat.update({
+            where: { id: existChatByPhone.id },
+            data: {
+              barberId,
+            },
+          });
 
-        return await this.create(createChatDto);
+          return await this.create(createChatDto);
+        }
       }
       if (existChatByPhone?.barbershopId) {
         return await this.selectBarberStep(
