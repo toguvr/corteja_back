@@ -464,6 +464,7 @@ export class ChatsService {
           finished: true,
         },
       });
+return
       return await this.create(createChatDto);
     }
     if (!existChatByPhone) {
@@ -792,7 +793,7 @@ export class ChatsService {
           type: 'EVP',
         });
       }
-      await whatsApi.post('/send-text', {
+      return await whatsApi.post('/send-text', {
         phone: phone,
         delayMessage: 5,
         message: 'Se deseja resetar o agendamento, digite: *resetar*',
