@@ -457,7 +457,7 @@ export class ChatsService {
       },
       include: { barbershop: true, service: true },
     });
-    if (existChatByPhone && createChatDto?.text?.message === 'resetar') {
+    if (existChatByPhone && !existChatByPhone?.finished&& createChatDto?.text?.message === 'resetar') {
       await this.prisma.chat.update({
         where: { id: existChatByPhone.id },
         data: {
