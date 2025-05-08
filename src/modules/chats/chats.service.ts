@@ -793,7 +793,7 @@ export class ChatsService {
           type: 'EVP',
         });
       }
-      return await whatsApi.post('/send-text', {
+      // return await whatsApi.post('/send-text', {
         phone: phone,
         delayMessage: 5,
         message: 'Se deseja resetar o agendamento, digite: *resetar*',
