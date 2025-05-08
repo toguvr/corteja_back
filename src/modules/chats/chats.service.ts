@@ -488,7 +488,7 @@ export class ChatsService {
         delayMessage: 5,
         message: `Fala ${firstName}! A qualquer momento, se quiser reiniciar todos os dados do agendamento, digite a palavra: *resetar*`,
       });
-      return await this.create(createChatDto);
+      return await this.create({ ...createChatDto, text: { message: '' } });
     }
     if (!existChatByPhone.customerId) {
       let cleanedPhone = phone.replace(/\D/g, '');
