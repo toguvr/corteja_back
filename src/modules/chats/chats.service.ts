@@ -176,7 +176,16 @@ export class ChatsService {
     existChatByPhoneId: string,
     createChatDto: any,
   ) {
-    const findAllEnterprises = await this.prisma.barbershop.findMany();
+    const findAllEnterprises = await this.prisma.barbershop.findMany({
+      where: {
+        id: {
+          notIn: [
+            'da54bab3-b9b0-403a-bf97-1fdc7695190d',
+            '41d5f081-9f6f-4d23-9c1d-d38661431432',
+          ],
+        },
+      },
+    });
     if (!findAllEnterprises.length) {
       await whatsApi.post('/send-text', {
         phone: phone,
@@ -191,7 +200,16 @@ export class ChatsService {
       });
       return await this.create(createChatDto);
     }
+    if (findAllEnterprises.length === 1) {
+      await this.prisma.chat.update({
+        where: { id: existChatByPhoneId },
+        data: {
+          barbershopId: findAllEnterprises[0]?.id,
+        },
+      });
 
+      return this.create(createChatDto);
+    }
     await whatsApi.post('/send-option-list', {
       phone: phone,
       message: 'Selecione a empresa para se agendar:',
@@ -476,6 +494,22 @@ export class ChatsService {
       });
       return await this.create({ ...createChatDto, text: { message: '' } });
     }
+    if (
+      existChatByPhone &&
+      !existChatByPhone?.finished &&
+      createChatDto?.buttonsResponseMessage?.buttonId.toLowerCase() ===
+        'resetar'
+    ) {
+      await this.prisma.chat.update({
+        where: { id: existChatByPhone.id },
+        data: {
+          date: null,
+          time: null,
+          scheduleId: null,
+        },
+      });
+      return await this.create({ ...createChatDto, text: { message: '' } });
+    }
     if (!existChatByPhone) {
       await this.prisma.chat.create({
         data: {
@@ -538,7 +572,7 @@ export class ChatsService {
               name: existChatByPhone.name,
               email: existChatByPhone.email,
               password,
-              document: existChatByPhone.document,
+              document: documentAnswered.replace(/\D/g, ''),
             });
             await this.prisma.chat.update({
               where: { id: existChatByPhone.id },
@@ -549,7 +583,7 @@ export class ChatsService {
             });
             await whatsApi.post('/send-text', {
               phone: phone,
-              message: `${firstName}, sua conta foi criada com sucesso!\r\n Agora você pode também fazer login pelo site usando a senha: *_${password}_*\r\nhttps://horacerta.app\r\nAgora, vamos continuar com o agendamento do seu horário!`,
+              message: `${firstName}, sua conta foi criada com sucesso!\r\n Agora você pode também fazer se agendar pelo site usando o email:\r\n${existChatByPhone.email} \r\n a senha: *_${password}_*\r\nno site: \r\nhttps://horacerta.app\r\n\r\nAgora, vamos continuar com o agendamento aqui mesmo do seu horário!`,
               delayMessage: 5,
             });
             return await this.create(createChatDto);

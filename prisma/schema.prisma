@@ -54,6 +54,7 @@ model Barbershop {
   id               String         @id @default(uuid())
   name             String
   avatar           String?
+  area             String?
   code             String?
   email            String
   password         String
