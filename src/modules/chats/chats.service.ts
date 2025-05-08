@@ -464,7 +464,7 @@ export class ChatsService {
           finished: true,
         },
       });
-return
+
       return await this.create(createChatDto);
     }
     if (!existChatByPhone) {
