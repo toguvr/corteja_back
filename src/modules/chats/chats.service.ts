@@ -118,6 +118,7 @@ export class ChatsService {
       .sort((a, b) => (a.time && b.time ? a.time.localeCompare(b.time) : 0));
   }
   parseBRDate(value: string): Date | null {
+    if (!value) return null;
     const [day, month, year] = value.split('/');
     if (!day || !month || !year) return null;
 
@@ -368,7 +369,11 @@ export class ChatsService {
           barbershopId: null,
         },
       });
-      return await this.create(data);
+      return await this.create({
+        ...data,
+        text: { message: '' },
+        listResponseMessage: { title: '' },
+      });
     }
 
     const sanitizedSchedules = schedules
@@ -458,9 +463,9 @@ export class ChatsService {
       optionList: {
         title: 'Opções disponíveis',
         buttonLabel: 'Abrir lista de opções',
-        options: times.map(({ time }) => ({
-          id: time,
-          title: time,
+        options: times.map((schedule) => ({
+          id: schedule.id,
+          title: schedule.time,
         })),
       },
       delayMessage: 5,
@@ -508,7 +513,11 @@ export class ChatsService {
           scheduleId: null,
         },
       });
-      return await this.create({ ...createChatDto, text: { message: '' } });
+      return await this.create({
+        ...createChatDto,
+        text: { message: '' },
+        buttonsResponseMessage: { buttonId: '' },
+      });
     }
     if (!existChatByPhone) {
       await this.prisma.chat.create({
@@ -556,11 +565,12 @@ export class ChatsService {
 
             return await this.create(createChatDto);
           }
-          return await whatsApi.post('/send-text', {
+          await whatsApi.post('/send-text', {
             phone: phone,
             message: `Fala ${firstName}, para criar seu cadastro, qual o seu e-mail?`,
             delayMessage: 5,
           });
+          return;
         }
         if (!existChatByPhone.document) {
           const documentAnswered = createChatDto?.text?.message;
@@ -588,11 +598,12 @@ export class ChatsService {
             });
             return await this.create(createChatDto);
           }
-          return await whatsApi.post('/send-text', {
+          await whatsApi.post('/send-text', {
             phone: phone,
             message: `${firstName}, para finalizar seu cadastro, qual o seu cpf?`,
             delayMessage: 5,
           });
+          return;
         }
       }
       await this.prisma.chat.update({
@@ -657,19 +668,21 @@ export class ChatsService {
     }
     if (!existChatByPhone.serviceId) {
       const serviceId = createChatDto?.listResponseMessage?.selectedRowId;
-      const service = await this.prisma.service.findFirst({
-        where: { id: serviceId },
-      });
-
-      if (service) {
-        await this.prisma.chat.update({
-          where: { id: existChatByPhone.id },
-          data: {
-            serviceId,
-          },
+      if (serviceId) {
+        const service = await this.prisma.service.findFirst({
+          where: { id: serviceId },
         });
 
-        return await this.create(createChatDto);
+        if (service) {
+          await this.prisma.chat.update({
+            where: { id: existChatByPhone.id },
+            data: {
+              serviceId,
+            },
+          });
+
+          return await this.create(createChatDto);
+        }
       }
       if (existChatByPhone?.barbershopId) {
         return await this.selectServiceStep(
@@ -682,20 +695,17 @@ export class ChatsService {
       }
     }
     if (!existChatByPhone.date) {
-      const scheduleId = createChatDto?.listResponseMessage?.selectedRowId;
       const receivedDate = this.parseBRDate(
         createChatDto?.listResponseMessage?.title,
       );
 
       const isValidDate = this.isValidDate(receivedDate?.toISOString() ?? '');
-      const isValidScheduleId = await this.isValidScheduleId(scheduleId);
-      if (isValidDate && isValidScheduleId) {
+      if (isValidDate) {
         const isoDate = receivedDate?.toISOString() ?? null;
         await this.prisma.chat.update({
           where: { id: existChatByPhone.id },
           data: {
             date: isoDate,
-            scheduleId,
           },
         });
 
@@ -717,11 +727,15 @@ export class ChatsService {
       }
     }
     if (!existChatByPhone.time) {
-      const time = createChatDto?.listResponseMessage?.selectedRowId;
-      if (this.isValidTime(time)) {
+      const scheduleId = createChatDto?.listResponseMessage?.selectedRowId;
+
+      const time = createChatDto?.listResponseMessage?.title;
+      const isValidScheduleId = await this.isValidScheduleId(scheduleId);
+      if (this.isValidTime(time) && isValidScheduleId) {
         await this.prisma.chat.update({
           where: { id: existChatByPhone.id },
           data: {
+            scheduleId,
             time,
           },
         });
@@ -786,13 +800,19 @@ export class ChatsService {
               finished: true,
             },
           });
+          const barbershopName = existChatByPhone?.barbershop?.name ?? '';
+          const serviceName = existChatByPhone?.service?.name ?? '';
+          const dateString = new Date(
+            existChatByPhone?.date ?? '',
+          ).toLocaleDateString('pt-BR');
+          const time = existChatByPhone?.time ?? '';
+
           await whatsApi.post('/send-text', {
-            phone: phone,
+            phone,
             delayMessage: 5,
-            message: `Agendamento realizado com sucesso! Dia ${new Date(
-              existChatByPhone?.date,
-            ).toLocaleDateString('pt-BR')} as ${existChatByPhone?.time}`,
+            message: `Agendamento de ${serviceName} realizado com sucesso em ${barbershopName}! Dia ${dateString} às ${time}`,
           });
+          return;
         }
       } catch (error) {
         await this.prisma.chat.update({
@@ -831,11 +851,12 @@ export class ChatsService {
             pix: order?.result?.pix?.qrCode,
           },
         });
-        return await whatsApi.post('send-button-pix', {
+        await whatsApi.post('send-button-pix', {
           phone,
           pixKey: order?.result?.pix?.qrCode,
           type: 'EVP',
         });
+        return;
       }
       return await whatsApi.post('/send-text', {
         phone: phone,
