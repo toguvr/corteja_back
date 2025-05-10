@@ -35,7 +35,15 @@ export class ChatsService {
     weeksToSchedule: number,
     schedules: { weekDay?: string; id: string }[],
   ): { id: Date; label: string; scheduleId: string }[] {
-    const today = new Date();
+    const now = new Date();
+    const offsetMs = -3 * 60 * 60 * 1000;
+    const localNow = new Date(now.getTime() + offsetMs);
+
+    const today = new Date(
+      localNow.getFullYear(),
+      localNow.getMonth(),
+      localNow.getDate(),
+    );
     today.setHours(0, 0, 0, 0);
 
     const currentDayOfWeek = today.getDay();
@@ -82,7 +90,7 @@ export class ChatsService {
     }[],
   ) {
     const selectedDay = date.getDay(); // 0 = domingo
-    const now = new Date();
+    const now = new Date(Date.now() - 3 * 60 * 60 * 1000);
 
     return schedules
       .filter((s) => Number(s.weekDay) === selectedDay && s.time)
