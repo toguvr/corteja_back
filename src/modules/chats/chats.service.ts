@@ -467,19 +467,25 @@ export class ChatsService {
       sanitizedSchedules,
     );
 
-if (!times.length) {
+    if (!times.length) {
       await whatsApi.post('/send-text', {
         phone: phone,
         delayMessage: 5,
         message: 'Nenhuma hora disponível para agendamento este dia.',
       });
 
-      return await this.prisma.chat.update({
+      await this.prisma.chat.update({
         where: { id: existChatByPhoneId },
         data: {
           date: null,
           scheduleId: null,
         },
+      });
+
+      return await this.create({
+        ...data,
+        text: { message: '' },
+        listResponseMessage: { title: '', selectedRowId: '' },
       });
     }
 
