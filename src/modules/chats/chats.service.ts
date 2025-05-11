@@ -583,16 +583,24 @@ export class ChatsService {
       existChatByPhone?.customerId &&
       createChatDto?.text?.message.toLowerCase() === 'cancelar'
     ) {
+      const nextAppointments =
+        await this.appointmentService.findAllNextFromUser(
+          existChatByPhone?.customerId,
+        );
+      if (!nextAppointments.length) {
+        await whatsApi.post('/send-text', {
+          phone: phone,
+          delayMessage: 5,
+          message: 'Nenhum agendamento futuro encontrado.',
+        });
+        return;
+      }
       await this.prisma.chat.update({
         where: { id: existChatByPhone?.id },
         data: {
           isCanceling: true,
         },
       });
-      const nextAppointments =
-        await this.appointmentService.findAllNextFromUser(
-          existChatByPhone?.customerId,
-        );
       const formattedCancelTime = this.formatMinutesToText(
         existChatByPhone?.barbershop?.minutesToCancel || 0,
       );
