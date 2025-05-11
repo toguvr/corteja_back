@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
@@ -44,8 +45,11 @@ export class PaymentsController {
     return this.paymentsService.findAllByBarbershop(user?.sub);
   }
   @Get('barbershop/withdrawals')
-  findAllWithdrawsByBarbershop(@CurrentUser() user) {
-    return this.paymentsService.findAllWithdrawalsByBarbershop(user?.sub);
+  findAllWithdrawsByBarbershop(
+    @CurrentUser() user,
+    @Query('page') page: string,
+  ) {
+    return this.paymentsService.findAllWithdrawalsByBarbershop(user?.sub, page);
   }
 
   @Get(':id')

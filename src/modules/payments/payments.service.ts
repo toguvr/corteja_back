@@ -123,8 +123,7 @@ export class PaymentsService {
       await whatsApi.post('/send-button-list', {
         phone: whatsapp,
         delayMessage: 5,
-        message:
-          'Pagamento recebido com sucesso! agendar no dia e horário escolhido?',
+        message: `✅ Pagamento identificado!\n\nSeu saldo foi atualizado. Agora você pode confirmar o agendamento.\n\nDeseja confirmar este horário?`,
         buttonList: {
           buttons: [
             {
@@ -181,7 +180,7 @@ export class PaymentsService {
 
     return response.data;
   }
-  async findAllWithdrawalsByBarbershop(barbershopId: string) {
+  async findAllWithdrawalsByBarbershop(barbershopId: string, page = '1') {
     const barbershop = await this.prisma.barbershop.findUnique({
       where: { id: barbershopId },
     });
@@ -189,7 +188,7 @@ export class PaymentsService {
       throw new BadRequestException('Empresa não encontrada.');
     }
     const response = await axios.get(
-      `https://api.pagar.me/core/v5/recipients/${barbershop?.receiverId}/withdrawals`,
+      `https://api.pagar.me/core/v5/recipients/${barbershop?.receiverId}/withdrawals?page=${page}&size=10`,
       {
         headers: {
           Authorization: `Basic ${Buffer.from(

@@ -26,6 +26,7 @@ export class ChatsService {
     return !isNaN(date.getTime());
   }
   async isValidScheduleId(value: string): Promise<boolean> {
+    if (!value) return false;
     const schedule = await this.prisma.schedule.findFirst({
       where: { id: value },
     });
@@ -537,7 +538,7 @@ export class ChatsService {
       await whatsApi.post('/send-text', {
         phone: phone,
         delayMessage: 5,
-        message: `Fala ${firstName}! A qualquer momento, se quiser reiniciar todos os dados do agendamento, digite a palavra: *resetar*`,
+        message: `Olá ${firstName}! 👋\n\nVocê pode agendar um horário rapidamente aqui pelo WhatsApp. Vamos começar?\n\nA qualquer momento, digite *resetar* para reiniciar.`,
       });
       return await this.create({ ...createChatDto, text: { message: '' } });
     }
@@ -818,23 +819,52 @@ export class ChatsService {
           await whatsApi.post('/send-text', {
             phone,
             delayMessage: 5,
-            message: `Agendamento de ${serviceName} realizado com sucesso em ${barbershopName}! Dia ${dateString} às ${time}`,
+            message: `✅ Agendamento confirmado com sucesso!\n\nVocê reservou o serviço *${serviceName}* em *${barbershopName}* para o dia *${dateString}* às *${time}*.\n\nNos vemos lá! 😉`,
           });
           return;
         }
-      } catch (error) {
+      } catch (err) {
+        const message =
+          err instanceof BadRequestException
+            ? err.message
+            : `❌ Ocorreu um erro inesperado ao tentar confirmar seu horário.\n\nPor favor, tente novamente em instantes ou digite *resetar* para reiniciar o processo.`;
+
         await this.prisma.chat.update({
           where: { id: existChatByPhone.id },
           data: {
+            scheduleId: null,
             time: null,
           },
         });
         await whatsApi.post('/send-text', {
           phone: phone,
           delayMessage: 5,
-          message: `Ocorreu um erro ao tentar agendar o horário, por favor, tente novamente.`,
+          message: `❌ ${message}\n\nSe quiser reiniciar o agendamento, digite: *resetar*`,
         });
-        return await this.create(createChatDto);
+        if (
+          existChatByPhone?.barbershopId &&
+          existChatByPhone?.barberId &&
+          existChatByPhone?.date &&
+          createChatDto
+        ) {
+          return await this.selectTimeStep(
+            phone,
+            existChatByPhone?.barbershopId,
+            existChatByPhone?.barberId,
+            existChatByPhone?.id,
+            createChatDto,
+            existChatByPhone?.date,
+          );
+        } else {
+          return await this.create({
+            ...createChatDto,
+            listResponseMessage: {
+              message: '',
+              title: null,
+              selectedRowId: null,
+            },
+          });
+        }
       }
     } else {
       const cartIds = existChatByPhone?.serviceId
@@ -858,6 +888,11 @@ export class ChatsService {
           data: {
             pix: order?.result?.pix?.qrCode,
           },
+        });
+        await whatsApi.post('/send-text', {
+          phone: phone,
+          delayMessage: 5,
+          message: `⚠️ Você não possui saldo suficiente para confirmar este agendamento.\n\nVamos gerar um Pix para você adicionar saldo à sua conta. Após o pagamento, volte aqui para finalizar o agendamento.`,
         });
         await whatsApi.post('send-button-pix', {
           phone,
