@@ -503,6 +503,16 @@ export class ChatsService {
       delayMessage: 5,
     });
   }
+  formatMinutesToText(minutes: number): string {
+    if (minutes <= 0) return ''; // Sem política de cancelamento com reembolso
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+
+    if (hours && remainingMinutes)
+      return `${hours} horas e ${remainingMinutes} minutos`;
+    if (hours) return `${hours} ${hours === 1 ? 'hora' : 'horas'}`;
+    return `${remainingMinutes} ${remainingMinutes === 1 ? 'minuto' : 'minutos'}`;
+  }
   async create(createChatDto) {
     const { phone, senderName } = createChatDto;
     const firstName = this.getFirstName(senderName);
@@ -517,6 +527,7 @@ export class ChatsService {
       },
       include: { barbershop: true, service: true },
     });
+
     if (
       existChatByPhone &&
       !existChatByPhone?.finished &&
@@ -527,6 +538,7 @@ export class ChatsService {
         data: {
           finished: true,
           barbershopId: null,
+          isCanceling: false,
         },
       });
       return await this.create({ ...createChatDto, text: { message: '' } });
@@ -543,6 +555,7 @@ export class ChatsService {
           date: null,
           time: null,
           scheduleId: null,
+          isCanceling: false,
         },
       });
       return await this.create({
@@ -564,6 +577,108 @@ export class ChatsService {
         message: `Olá ${firstName}! 👋\n\nVocê pode agendar um horário rapidamente aqui pelo WhatsApp. Vamos começar?\n\nA qualquer momento, digite *resetar* para reiniciar.`,
       });
       return await this.create({ ...createChatDto, text: { message: '' } });
+    }
+
+    if (
+      existChatByPhone?.customerId &&
+      createChatDto?.text?.message.toLowerCase() === 'cancelar'
+    ) {
+      await this.prisma.chat.update({
+        where: { id: existChatByPhone?.id },
+        data: {
+          isCanceling: true,
+        },
+      });
+      const nextAppointments =
+        await this.appointmentService.findAllNextFromUser(
+          existChatByPhone?.customerId,
+        );
+      const formattedCancelTime = this.formatMinutesToText(
+        existChatByPhone?.barbershop?.minutesToCancel || 0,
+      );
+
+      const message = formattedCancelTime
+        ? `Você deseja cancelar um agendamento? 👇\n\nSelecione abaixo qual agendamento deseja cancelar. Se o cancelamento for feito até *${formattedCancelTime} antes* do horário marcado, o valor será *devolvido como saldo* na sua conta.\n\n ⚠️ Após esse prazo, o valor será cobrado normalmente, mesmo que você não compareça.`
+        : `Você deseja cancelar um agendamento? 👇\n\n Selecione abaixo qual agendamento deseja cancelar.`;
+      await whatsApi.post('/send-option-list', {
+        phone,
+        message,
+        optionList: {
+          title: 'Agendamentos próximos',
+          buttonLabel: 'Ver opções',
+          options: nextAppointments.map((appt) => {
+            const localDate = new Date(
+              new Date(appt.date).getTime() - 3 * 60 * 60 * 1000,
+            );
+
+            return {
+              id: appt.id,
+              title: `${localDate.toLocaleDateString('pt-BR')} às ${localDate.toLocaleTimeString(
+                'pt-BR',
+                {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                },
+              )}`,
+              description: `Serviço: ${appt?.service?.name} - Valor: ${(
+                ((appt?.service?.amount || 0) / 100) *
+                (1 + (appt?.barbershop?.fee || 0) / 100)
+              ).toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              })}`,
+            };
+          }),
+        },
+        delayMessage: 5,
+      });
+      return;
+    }
+    if (existChatByPhone.isCanceling) {
+      const appointmentIdToCancel =
+        createChatDto?.listResponseMessage?.selectedRowId;
+      if (appointmentIdToCancel) {
+        const appointmentIdToCancelExists =
+          await this.prisma.appointment.findFirst({
+            where: { id: appointmentIdToCancel },
+          });
+        if (appointmentIdToCancelExists) {
+          try {
+            await this.appointmentService.remove(appointmentIdToCancel);
+            await whatsApi.post('/send-text', {
+              phone: phone,
+              message:
+                '✅ Agendamento cancelado com sucesso! O valor foi devolvido como saldo na sua conta. Agora é só escolher um novo horário 😉',
+              delayMessage: 5,
+            });
+            await this.prisma.chat.update({
+              where: { id: existChatByPhone.id },
+              data: {
+                finished: true,
+                isCanceling: false,
+              },
+            });
+            return;
+          } catch (err) {
+            const message =
+              err instanceof BadRequestException
+                ? err.message
+                : `Ocorreu um erro ao cancelar o agendamento. Tente novamente mais tarde.`;
+            await whatsApi.post('/send-text', {
+              phone: phone,
+              message,
+              delayMessage: 5,
+            });
+            return;
+          }
+        }
+      }
+
+      await whatsApi.post('/send-text', {
+        phone: phone,
+        message: 'agendamento não encontrado',
+        delayMessage: 5,
+      });
     }
     if (!existChatByPhone.customerId) {
       let cleanedPhone = phone.replace(/\D/g, '');
@@ -623,6 +738,15 @@ export class ChatsService {
                 customerId: user.id,
               },
             });
+            await whatsApi.post('/send-contact', {
+              phone: phone,
+              contactName: 'Hora Certa',
+              contactPhone: '5524998310271',
+              contactBusinessDescription:
+                'Salve nosso contato para te facilitar em futuros agendamentos',
+              delayMessage: 5,
+            });
+
             await whatsApi.post('/send-text', {
               phone: phone,
               message: `${firstName}, sua conta foi criada com sucesso!\r\n Agora você pode também se agendar usando o email:\r\n${existChatByPhone.email.toLowerCase()} \r\n a senha:\r\n *_${password}_*\r\nno site: \r\nhttps://horacerta.app\r\n\r\nAgora, vamos continuar com o agendamento aqui mesmo do seu horário!`,
@@ -842,7 +966,7 @@ export class ChatsService {
           await whatsApi.post('/send-text', {
             phone,
             delayMessage: 5,
-            message: `✅ Agendamento confirmado com sucesso!\n\nVocê reservou o serviço *${serviceName}* em *${barbershopName}* para o dia *${dateString}* às *${time}*.\n\nNos vemos lá! 😉`,
+            message: `✅ Agendamento confirmado com sucesso!\n\nVocê reservou o serviço *${serviceName}* em *${barbershopName}* para o dia *${dateString}* às *${time}*.\n\nNos vemos lá! 😉\n\nSe precisar cancelar, basta iniciar uma conversa aqui no WhatsApp e enviar a palavra *cancelar*.`,
           });
           return;
         }
@@ -915,7 +1039,7 @@ export class ChatsService {
         await whatsApi.post('/send-text', {
           phone: phone,
           delayMessage: 5,
-          message: `⚠️ Você não possui saldo suficiente para confirmar este agendamento.\n\nVamos gerar um Pix para você adicionar saldo à sua conta. Após o pagamento, volte aqui para finalizar o agendamento.`,
+          message: `⚠️ Você não possui saldo suficiente para confirmar este agendamento.\n\nVamos gerar um Pix para você adicionar saldo à sua conta. Após o pagamento, volte aqui no WhatsApp para finalizar o agendamento.\n\n📌 Você poderá cancelar este agendamento até *${existChatByPhone?.barbershop?.minutesToCancel} minutos antes* do horário marcado. Nesse caso, o valor será *devolvido como saldo* na sua conta.\n\n⛔️ Após esse prazo, o valor será *cobrado normalmente*, mesmo que você não compareça.`,
         });
         await whatsApi.post('send-button-pix', {
           phone,
