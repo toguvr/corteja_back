@@ -127,7 +127,7 @@ export class PaymentsService {
         buttonList: {
           buttons: [
             {
-              id: 'sim',
+              id: 'confirmar',
               label: 'Sim',
             },
             {

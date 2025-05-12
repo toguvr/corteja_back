@@ -491,7 +491,7 @@ export class ChatsService {
 
     await whatsApi.post('/send-option-list', {
       phone: phone,
-      message: 'Selecione a hora para se agendar:',
+      message: `Selecione a hora para se agendar dia ${new Date(date).toLocaleDateString('pt-BR')}:`,
       optionList: {
         title: 'Opções disponíveis',
         buttonLabel: 'Abrir lista de opções',
@@ -555,6 +555,9 @@ export class ChatsService {
           date: null,
           time: null,
           scheduleId: null,
+          barberId: null,
+          barbershopId: null,
+          serviceId: null,
           isCanceling: false,
         },
       });
@@ -722,7 +725,7 @@ export class ChatsService {
           }
           await whatsApi.post('/send-text', {
             phone: phone,
-            message: `Fala ${firstName}, para criar seu cadastro, qual o seu e-mail?`,
+            message: `Fala ${firstName}, me passa um e-mail válido pra gente criar seu cadastro?`,
             delayMessage: 5,
           });
           return;
@@ -764,7 +767,7 @@ export class ChatsService {
           }
           await whatsApi.post('/send-text', {
             phone: phone,
-            message: `${firstName}, para finalizar seu cadastro, qual o seu cpf?`,
+            message: `${firstName}, envia um CPF válido pra concluirmos seu cadastro.`,
             delayMessage: 5,
           });
           return;
@@ -925,102 +928,134 @@ export class ChatsService {
 
     const userBalance = await this.balanceService.findMine({
       customerId: existChatByPhone?.customerId,
-      barbershopId: existChatByPhone?.barbershopId!,
+      barbershopId: existChatByPhone?.barbershopId,
     });
 
     const servicePrice = existChatByPhone?.service?.amount || 0;
     if (userBalance >= servicePrice) {
-      try {
-        if (
-          existChatByPhone?.date &&
-          existChatByPhone?.time &&
-          existChatByPhone?.serviceId &&
-          existChatByPhone?.barberId &&
-          existChatByPhone?.barbershopId &&
-          existChatByPhone?.scheduleId &&
-          existChatByPhone?.customerId
-        ) {
-          const dateWithTime = this.setTimeOnDate(
-            new Date(existChatByPhone?.date),
-            existChatByPhone?.time,
-          );
+      if (
+        existChatByPhone &&
+        !existChatByPhone?.finished &&
+        createChatDto?.buttonsResponseMessage?.buttonId.toLowerCase() ===
+          'confirmar'
+      ) {
+        try {
+          if (
+            existChatByPhone?.date &&
+            existChatByPhone?.time &&
+            existChatByPhone?.serviceId &&
+            existChatByPhone?.barberId &&
+            existChatByPhone?.barbershopId &&
+            existChatByPhone?.scheduleId &&
+            existChatByPhone?.customerId
+          ) {
+            const dateWithTime = this.setTimeOnDate(
+              new Date(existChatByPhone?.date),
+              existChatByPhone?.time,
+            );
 
-          // adiciona 3 horas (em milissegundos)
-          dateWithTime.setHours(dateWithTime.getHours() + 3);
+            // adiciona 3 horas (em milissegundos)
+            dateWithTime.setHours(dateWithTime.getHours() + 3);
 
-          const finalDate = dateWithTime;
-          const appointment = await this.appointmentService.create({
-            customerId: existChatByPhone?.customerId,
-            barbershopId: existChatByPhone?.barbershopId,
-            barberId: existChatByPhone?.barberId,
-            serviceId: existChatByPhone?.serviceId,
-            scheduleId: existChatByPhone?.scheduleId,
-            date: finalDate,
-          });
+            const finalDate = dateWithTime;
+            const appointment = await this.appointmentService.create({
+              customerId: existChatByPhone?.customerId,
+              barbershopId: existChatByPhone?.barbershopId,
+              barberId: existChatByPhone?.barberId,
+              serviceId: existChatByPhone?.serviceId,
+              scheduleId: existChatByPhone?.scheduleId,
+              date: finalDate,
+            });
+            await this.prisma.chat.update({
+              where: { id: existChatByPhone.id },
+              data: {
+                appointmentId: appointment?.id,
+                finished: true,
+              },
+            });
+            const barbershopName = existChatByPhone?.barbershop?.name ?? '';
+            const serviceName = existChatByPhone?.service?.name ?? '';
+            const dateString = new Date(
+              existChatByPhone?.date ?? '',
+            ).toLocaleDateString('pt-BR');
+            const time = existChatByPhone?.time ?? '';
+
+            await whatsApi.post('/send-text', {
+              phone,
+              delayMessage: 5,
+              message: `✅ Agendamento confirmado com sucesso!\n\nVocê reservou o serviço *${serviceName}* em *${barbershopName}* para o dia *${dateString}* às *${time}*.\n\nNos vemos lá! 😉\n\nSe precisar cancelar, basta iniciar uma conversa aqui no WhatsApp e enviar a palavra *cancelar*.`,
+            });
+            return;
+          }
+        } catch (err) {
+          const message =
+            err instanceof BadRequestException
+              ? err.message
+              : `❌ Ocorreu um erro inesperado ao tentar confirmar seu horário.\n\nPor favor, tente novamente em instantes ou digite *resetar* para reiniciar o processo.`;
+
           await this.prisma.chat.update({
             where: { id: existChatByPhone.id },
             data: {
-              appointmentId: appointment?.id,
-              finished: true,
+              scheduleId: null,
+              time: null,
             },
           });
-          const barbershopName = existChatByPhone?.barbershop?.name ?? '';
-          const serviceName = existChatByPhone?.service?.name ?? '';
-          const dateString = new Date(
-            existChatByPhone?.date ?? '',
-          ).toLocaleDateString('pt-BR');
-          const time = existChatByPhone?.time ?? '';
-
           await whatsApi.post('/send-text', {
-            phone,
+            phone: phone,
             delayMessage: 5,
-            message: `✅ Agendamento confirmado com sucesso!\n\nVocê reservou o serviço *${serviceName}* em *${barbershopName}* para o dia *${dateString}* às *${time}*.\n\nNos vemos lá! 😉\n\nSe precisar cancelar, basta iniciar uma conversa aqui no WhatsApp e enviar a palavra *cancelar*.`,
+            message: `❌ ${message}\n\nSe quiser reiniciar o agendamento, digite: *resetar*`,
           });
-          return;
-        }
-      } catch (err) {
-        const message =
-          err instanceof BadRequestException
-            ? err.message
-            : `❌ Ocorreu um erro inesperado ao tentar confirmar seu horário.\n\nPor favor, tente novamente em instantes ou digite *resetar* para reiniciar o processo.`;
-
-        await this.prisma.chat.update({
-          where: { id: existChatByPhone.id },
-          data: {
-            scheduleId: null,
-            time: null,
-          },
-        });
-        await whatsApi.post('/send-text', {
-          phone: phone,
-          delayMessage: 5,
-          message: `❌ ${message}\n\nSe quiser reiniciar o agendamento, digite: *resetar*`,
-        });
-        if (
-          existChatByPhone?.barbershopId &&
-          existChatByPhone?.barberId &&
-          existChatByPhone?.date &&
-          createChatDto
-        ) {
-          return await this.selectTimeStep(
-            phone,
-            existChatByPhone?.barbershopId,
-            existChatByPhone?.barberId,
-            existChatByPhone?.id,
-            createChatDto,
-            existChatByPhone?.date,
-          );
-        } else {
-          return await this.create({
-            ...createChatDto,
-            listResponseMessage: {
-              message: '',
-              title: null,
-              selectedRowId: null,
-            },
-          });
+          if (
+            existChatByPhone?.barbershopId &&
+            existChatByPhone?.barberId &&
+            existChatByPhone?.date &&
+            createChatDto
+          ) {
+            return await this.selectTimeStep(
+              phone,
+              existChatByPhone?.barbershopId,
+              existChatByPhone?.barberId,
+              existChatByPhone?.id,
+              createChatDto,
+              existChatByPhone?.date,
+            );
+          } else {
+            return await this.create({
+              ...createChatDto,
+              listResponseMessage: {
+                message: '',
+                title: null,
+                selectedRowId: null,
+              },
+            });
+          }
         }
       }
+      const barbershopName = existChatByPhone?.barbershop?.name ?? '';
+      const serviceName = existChatByPhone?.service?.name ?? '';
+      const dateString = new Date(
+        existChatByPhone?.date ?? '',
+      ).toLocaleDateString('pt-BR');
+      const time = existChatByPhone?.time ?? '';
+
+      await whatsApi.post('/send-button-list', {
+        phone: phone,
+        delayMessage: 5,
+        message: `Deseja confirmar o agendamento de *${serviceName}* em *${barbershopName}* para o dia *${dateString}* às *${time}* ?`,
+        buttonList: {
+          buttons: [
+            {
+              id: 'confirmar',
+              label: 'Sim',
+            },
+            {
+              id: 'resetar',
+              label: 'Não',
+            },
+          ],
+        },
+      });
+      return;
     } else {
       const cartIds = existChatByPhone?.serviceId
         ? [existChatByPhone?.serviceId]
@@ -1044,10 +1079,16 @@ export class ChatsService {
             pix: order?.result?.pix?.qrCode,
           },
         });
+        const barbershopName = existChatByPhone?.barbershop?.name ?? '';
+        const serviceName = existChatByPhone?.service?.name ?? '';
+        const dateString = new Date(
+          existChatByPhone?.date ?? '',
+        ).toLocaleDateString('pt-BR');
+        const time = existChatByPhone?.time ?? '';
         await whatsApi.post('/send-text', {
           phone: phone,
           delayMessage: 5,
-          message: `⚠️ Você não possui saldo suficiente para confirmar este agendamento.\n\nVamos gerar um Pix para você adicionar saldo à sua conta. Após o pagamento, volte aqui no WhatsApp para finalizar o agendamento.\n\n📌 Você poderá cancelar este agendamento até *${existChatByPhone?.barbershop?.minutesToCancel} minutos antes* do horário marcado. Nesse caso, o valor será *devolvido como saldo* na sua conta.\n\n⛔️ Após esse prazo, o valor será *cobrado normalmente*, mesmo que você não compareça.`,
+          message: `⚠️ Você não possui saldo suficiente para confirmar este agendamento de *${serviceName}* em *${barbershopName}* para o dia *${dateString}* às *${time}*.\n\nVamos gerar um Pix para você adicionar saldo à sua conta. Após o pagamento, volte aqui no WhatsApp para finalizar o agendamento.\n\n📌 Você poderá cancelar este agendamento até *${existChatByPhone?.barbershop?.minutesToCancel} minutos antes* do horário marcado. Nesse caso, o valor será *devolvido como saldo* na sua conta.\n\n⛔️ Após esse prazo, o valor será *cobrado normalmente*, mesmo que você não compareça.`,
         });
         await whatsApi.post('send-button-pix', {
           phone,
