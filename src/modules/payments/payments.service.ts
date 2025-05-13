@@ -120,23 +120,72 @@ export class PaymentsService {
       });
     }
     if (whatsapp) {
-      await whatsApi.post('/send-button-list', {
-        phone: whatsapp,
-        delayMessage: 5,
-        message: `✅ Pagamento identificado!\n\nSeu saldo foi atualizado. Agora você pode confirmar o agendamento.\n\nDeseja confirmar este horário?`,
-        buttonList: {
-          buttons: [
-            {
-              id: 'confirmar',
-              label: 'Sim',
-            },
-            {
-              id: 'resetar',
-              label: 'Não',
-            },
-          ],
+      const twentyMinutesAgo = new Date(Date.now() - 20 * 60 * 1000);
+
+      const existChatByPhone = await this.prisma.chat.findFirst({
+        where: {
+          phone: whatsapp,
+          finished: false,
+          createdAt: {
+            gte: twentyMinutesAgo,
+          },
         },
+        include: { barbershop: true, service: true },
       });
+      if (
+        existChatByPhone?.barbershopId &&
+        existChatByPhone?.serviceId &&
+        existChatByPhone?.time &&
+        existChatByPhone?.date
+      ) {
+        const barbershopName = existChatByPhone?.barbershop?.name ?? '';
+        const serviceName = existChatByPhone?.service?.name ?? '';
+        const dateString = new Date(
+          existChatByPhone?.date ?? '',
+        ).toLocaleDateString('pt-BR');
+        const time = existChatByPhone?.time ?? '';
+        const weekDay = new Date(
+          existChatByPhone?.date ?? '',
+        ).toLocaleDateString('pt-BR', {
+          weekday: 'long',
+        });
+
+        await whatsApi.post('/send-button-list', {
+          phone: whatsapp,
+          delayMessage: 5,
+          message: `✅ Pagamento identificado!\n\nSeu saldo foi atualizado. Agora você pode confirmar o agendamento.\n\nDeseja confirmar o agendamento de *${serviceName}* em *${barbershopName}* para o dia *${dateString} (${weekDay})* às *${time}* ?`,
+          buttonList: {
+            buttons: [
+              {
+                id: 'confirmar',
+                label: 'Sim',
+              },
+              {
+                id: 'resetar',
+                label: 'Não',
+              },
+            ],
+          },
+        });
+      } else {
+        await whatsApi.post('/send-button-list', {
+          phone: whatsapp,
+          delayMessage: 5,
+          message: `✅ Pagamento identificado!\n\nSeu saldo foi atualizado. Agora você pode confirmar o agendamento.\n\nDeseja confirmar o agendamento?`,
+          buttonList: {
+            buttons: [
+              {
+                id: 'confirmar',
+                label: 'Sim',
+              },
+              {
+                id: 'resetar',
+                label: 'Não',
+              },
+            ],
+          },
+        });
+      }
     }
     return payment;
   }

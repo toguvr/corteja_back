@@ -979,11 +979,15 @@ export class ChatsService {
               existChatByPhone?.date ?? '',
             ).toLocaleDateString('pt-BR');
             const time = existChatByPhone?.time ?? '';
-
+            const weekDay = new Date(
+              existChatByPhone?.date ?? '',
+            ).toLocaleDateString('pt-BR', {
+              weekday: 'long',
+            });
             await whatsApi.post('/send-text', {
               phone,
               delayMessage: 5,
-              message: `✅ Agendamento confirmado com sucesso!\n\nVocê reservou o serviço *${serviceName}* em *${barbershopName}* para o dia *${dateString}* às *${time}*.\n\nNos vemos lá! 😉\n\nSe precisar cancelar, basta iniciar uma conversa aqui no WhatsApp e enviar a palavra *cancelar*.`,
+              message: `✅ Agendamento confirmado com sucesso!\n\nVocê reservou o serviço *${serviceName}* em *${barbershopName}* para o dia *${dateString} (${weekDay})* às *${time}*.\n\nNos vemos lá! 😉\n\nSe precisar cancelar, basta iniciar uma conversa aqui no WhatsApp e enviar a palavra *cancelar*.`,
             });
             return;
           }
@@ -1037,11 +1041,16 @@ export class ChatsService {
         existChatByPhone?.date ?? '',
       ).toLocaleDateString('pt-BR');
       const time = existChatByPhone?.time ?? '';
-
+      const weekDay = new Date(existChatByPhone?.date ?? '').toLocaleDateString(
+        'pt-BR',
+        {
+          weekday: 'long',
+        },
+      );
       await whatsApi.post('/send-button-list', {
         phone: phone,
         delayMessage: 5,
-        message: `Deseja confirmar o agendamento de *${serviceName}* em *${barbershopName}* para o dia *${dateString}* às *${time}* ?`,
+        message: `Deseja confirmar o agendamento de *${serviceName}* em *${barbershopName}* para o dia *${dateString} (${weekDay})* às *${time}* ?`,
         buttonList: {
           buttons: [
             {
@@ -1085,10 +1094,15 @@ export class ChatsService {
           existChatByPhone?.date ?? '',
         ).toLocaleDateString('pt-BR');
         const time = existChatByPhone?.time ?? '';
+        const weekDay = new Date(
+          existChatByPhone?.date ?? '',
+        ).toLocaleDateString('pt-BR', {
+          weekday: 'long',
+        });
         await whatsApi.post('/send-text', {
           phone: phone,
           delayMessage: 5,
-          message: `⚠️ Você não possui saldo suficiente para confirmar este agendamento de *${serviceName}* em *${barbershopName}* para o dia *${dateString}* às *${time}*.\n\nVamos gerar um Pix para você adicionar saldo à sua conta. Após o pagamento, volte aqui no WhatsApp para finalizar o agendamento.\n\n📌 Você poderá cancelar este agendamento até *${existChatByPhone?.barbershop?.minutesToCancel} minutos antes* do horário marcado. Nesse caso, o valor será *devolvido como saldo* na sua conta.\n\n⛔️ Após esse prazo, o valor será *cobrado normalmente*, mesmo que você não compareça.`,
+          message: `⚠️ Você não possui saldo suficiente para confirmar este agendamento de *${serviceName}* em *${barbershopName}* para o dia *${dateString} (${weekDay})* às *${time}*.\n\nVamos gerar um Pix para você adicionar saldo à sua conta. Após o pagamento, volte aqui no WhatsApp para finalizar o agendamento.\n\n📌 Você poderá cancelar este agendamento até *${existChatByPhone?.barbershop?.minutesToCancel} minutos antes* do horário marcado. Nesse caso, o valor será *devolvido como saldo* na sua conta.\n\n⛔️ Após esse prazo, o valor será *cobrado normalmente*, mesmo que você não compareça.`,
         });
         await whatsApi.post('send-button-pix', {
           phone,
